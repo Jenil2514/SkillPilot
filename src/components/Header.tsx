@@ -23,6 +23,9 @@ const Header = () => {
               <Link to="/social" className="text-gray-700 hover:text-purple-600 transition-colors">
                 Community
               </Link>
+              <Link to="/shorts" className="text-gray-700 hover:text-purple-600 transition-colors">
+                Shorts
+              </Link>
             </nav>
           </div>
 
