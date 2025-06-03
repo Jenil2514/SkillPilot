@@ -2,6 +2,7 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Search, ShoppingCart, Globe } from "lucide-react";
+import { Link } from "react-router-dom";
 
 const Header = () => {
   return (
@@ -10,13 +11,18 @@ const Header = () => {
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <div className="flex items-center space-x-8">
-            <h1 className="text-2xl font-bold text-purple-600">EduLearn</h1>
+            <Link to="/">
+              <h1 className="text-2xl font-bold text-purple-600">EduLearn</h1>
+            </Link>
             
             {/* Categories */}
             <nav className="hidden md:flex space-x-6">
               <button className="text-gray-700 hover:text-purple-600 transition-colors">
                 Explore
               </button>
+              <Link to="/social" className="text-gray-700 hover:text-purple-600 transition-colors">
+                Community
+              </Link>
             </nav>
           </div>
 
