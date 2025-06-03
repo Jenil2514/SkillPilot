@@ -1,6 +1,7 @@
 
 import React from 'react';
 import CourseCard from '@/components/CourseCard';
+import { Button } from '@/components/ui/button';
 
 const RelatedCourses = () => {
   const relatedCourses = [
