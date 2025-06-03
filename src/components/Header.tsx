@@ -17,9 +17,9 @@ const Header = () => {
             
             {/* Categories */}
             <nav className="hidden md:flex space-x-6">
-              <button className="text-gray-700 hover:text-purple-600 transition-colors">
-                Explore
-              </button>
+              <Link to="/categories" className="text-gray-700 hover:text-purple-600 transition-colors">
+                Categories
+              </Link>
               <Link to="/social" className="text-gray-700 hover:text-purple-600 transition-colors">
                 Community
               </Link>
