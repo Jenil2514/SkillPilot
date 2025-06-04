@@ -77,7 +77,7 @@ const ResetPassword = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background">
       <Header />
       
       <div className="container mx-auto px-4 py-8">
@@ -90,7 +90,7 @@ const ResetPassword = () => {
                 </Link>
                 <CardTitle className="text-2xl">Reset Password</CardTitle>
               </div>
-              <p className="text-gray-600">
+              <p className="text-gray-600 dark:text-gray-300">
                 Enter the verification code and your new password
               </p>
             </CardHeader>

@@ -17,11 +17,15 @@ import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 import ContactUs from "./pages/ContactUs";
 import NotFound from "./pages/NotFound";
+import SearchPage from "./pages/SearchPage";
+import { ThemeProvider } from "@/contexts/ThemeContext";
+
 
 const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
+    <ThemeProvider>
     <AuthProvider>
       <TooltipProvider>
         <Toaster />
@@ -30,7 +34,7 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/course/:courseId" element={<CoursePage />} />
-            <Route path="/social" element={<SocialFeed />} />
+            <Route path="/community" element={<SocialFeed />} />
             <Route path="/categories" element={<CategoryPage />} />
             <Route path="/saved-courses" element={<SavedCourses />} />
             <Route path="/auth" element={<AuthPage />} />
@@ -38,12 +42,15 @@ const App = () => (
             <Route path="/user/:userId" element={<UserProfile />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/reset-password" element={<ResetPassword />} />
-            <Route path="/contact" element={<ContactUs />} />
+            <Route path="/contactUs" element={<ContactUs />} />
+            <Route path="/search" element={<SearchPage />} />
+
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
       </TooltipProvider>
     </AuthProvider>
+    </ThemeProvider>
   </QueryClientProvider>
 );
 

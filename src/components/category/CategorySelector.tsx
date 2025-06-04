@@ -33,7 +33,7 @@ const CategorySelector = ({ selectedCategory, onCategorySelect }: CategorySelect
               className={`w-full flex items-center space-x-3 p-3 rounded-lg transition-colors ${
                 selectedCategory === category.id
                   ? 'bg-purple-600 text-white'
-                  : 'hover:bg-gray-100'
+                  : 'hover:bg-purple-50 hover:text-purple-600'
               }`}
             >
               <div className={`p-2 rounded-lg ${selectedCategory === category.id ? 'bg-white bg-opacity-20' : category.color}`}>

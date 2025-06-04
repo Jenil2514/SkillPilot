@@ -183,7 +183,7 @@ const CourseViewer = ({ university, semester, course }: CourseViewerProps) => {
     return (
       <Card>
         <CardContent className="p-6">
-          <div className="text-center">Loading course sources...</div>
+          <div className="text-foreground">Loading course sources...</div>
         </CardContent>
       </Card>
     );
@@ -199,7 +199,7 @@ const CourseViewer = ({ university, semester, course }: CourseViewerProps) => {
           </div>
           <Button
             onClick={() => setShowAddSource(!showAddSource)}
-            className="bg-purple-600 hover:bg-purple-700"
+            className="bg-purple-600 hover:bg-purple-700 text-white"
           >
             <Plus className="h-4 w-4 mr-2" />
             Add Source
@@ -252,7 +252,7 @@ const CourseViewer = ({ university, semester, course }: CourseViewerProps) => {
               </div>
 
               <div className="flex space-x-2">
-                <Button onClick={handleAddSource} className="bg-purple-600 hover:bg-purple-700">
+                <Button onClick={handleAddSource} className="bg-purple-600 hover:bg-purple-700 text-white">
                   Add Source
                 </Button>
                 <Button variant="outline" onClick={() => setShowAddSource(false)}>

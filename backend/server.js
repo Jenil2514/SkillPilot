@@ -21,8 +21,13 @@ const app = express();
 app.use(helmet());
 app.use(cors());
 app.use(express.json());
-app.use(mongoSanitize());
-app.use(rateLimit({
+
+app.use(
+  mongoSanitize({
+    replaceWith: '_', // Replaces unsafe characters instead of trying to delete or reassign
+    allowDots: true,  // Allows dots in keys if you're using nested objects
+  })
+);app.use(rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 100,
 }));

@@ -25,7 +25,7 @@ const CourseCard = ({ title, instructor, rating, reviewCount, price, image, badg
 
   return (
     <Link to="/course/1" className="block">
-      <div className="bg-white rounded-lg shadow-sm hover:shadow-lg transition-shadow cursor-pointer group">
+      <div className="bg-background rounded-lg shadow-sm hover:shadow-lg transition-shadow cursor-pointer group">
         <div className="relative">
           <img 
             src={image} 
@@ -48,10 +48,10 @@ const CourseCard = ({ title, instructor, rating, reviewCount, price, image, badg
         </div>
         
         <div className="p-4">
-          <h3 className="font-bold text-gray-900 mb-2 line-clamp-2 group-hover:text-purple-600 transition-colors">
+          <h3 className="font-bold text-gray-900 dark:text-gray-300 mb-2 line-clamp-2 group-hover:text-purple-600 transition-colors">
             {title}
           </h3>
-          <p className="text-sm text-gray-600 mb-2">{instructor}</p>
+          <p className="text-sm text-gray-600 dark:text-gray-300 mb-2">{instructor}</p>
           
           <div className="flex items-center mb-2">
             <span className="font-bold text-orange-500 mr-1">{rating}</span>
@@ -63,10 +63,9 @@ const CourseCard = ({ title, instructor, rating, reviewCount, price, image, badg
                 />
               ))}
             </div>
-            <span className="text-sm text-gray-500 ml-2">({reviewCount})</span>
+            <span className="text-sm text-gray-500 dark:text-gray-300 ml-2">({reviewCount})</span>
           </div>
           
-          <div className="font-bold text-lg">{price}</div>
         </div>
       </div>
     </Link>

@@ -37,10 +37,14 @@ const ForgotPassword = () => {
         title: "OTP Sent",
         description: "Check your email for the verification code",
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
+      let errorMessage = "Failed to send OTP";
+      if (error && typeof error === "object" && "response" in error && error.response && typeof error.response === "object" && "data" in error.response && error.response.data && typeof error.response.data === "object" && "message" in error.response.data) {
+        errorMessage = (error.response as { data: { message?: string } }).data.message || errorMessage;
+      }
       toast({
         title: "Error",
-        description: error.response?.data?.message || "Failed to send OTP",
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {
@@ -49,7 +53,7 @@ const ForgotPassword = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background">
       <Header />
       
       <div className="container mx-auto px-4 py-8">

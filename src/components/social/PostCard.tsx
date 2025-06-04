@@ -67,44 +67,34 @@ const PostCard = ({ post }: PostCardProps) => {
             <div className="flex items-center space-x-2">
               <Link 
                 to={post.user.id ? `/user/${post.user.id}` : '#'} 
-                className="font-semibold text-gray-900 hover:text-purple-600 transition-colors"
+                className="font-semibold text-gray-900 dark:text-gray-300 hover:text-purple-600 transition-colors"
               >
                 {post.user.name}
               </Link>
               <Link 
                 to={post.user.id ? `/user/${post.user.id}` : '#'} 
-                className="text-gray-500 hover:text-purple-600 transition-colors"
+                className="text-gray-500 dark:text-gray-300 hover:text-purple-600 transition-colors"
               >
                 @{post.user.username}
               </Link>
               <span className="text-gray-500">·</span>
-              <span className="text-gray-500 text-sm">{post.timestamp}</span>
+              <span className="text-gray-500 dark:text-gray-300 text-sm">{post.timestamp}</span>
             </div>
             
-            <p className="text-gray-800 leading-relaxed">{post.content}</p>
+            <p className="text-gray-800 leading-relaxed dark:text-gray-300">{post.content}</p>
             
-            <div className="flex items-center justify-between pt-2 max-w-md">
+            <div className="flex items-center  pt-2 max-w-md">
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={handleComment}
-                className="text-gray-500 hover:text-blue-600 hover:bg-blue-50"
+                className="text-gray-500  hover:text-blue-600 hover:bg-blue-50"
               >
                 <MessageCircle className="w-4 h-4 mr-1" />
                 <span className="text-sm">{post.comments}</span>
               </Button>
               
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleRepost}
-                className={`text-gray-500 hover:text-green-600 hover:bg-green-50 ${
-                  post.isReposted ? 'text-green-600' : ''
-                }`}
-              >
-                <Repeat2 className="w-4 h-4 mr-1" />
-                <span className="text-sm">{post.reposts}</span>
-              </Button>
+              
               
               <Button
                 variant="ghost"
@@ -122,7 +112,7 @@ const PostCard = ({ post }: PostCardProps) => {
                 variant="ghost"
                 size="sm"
                 onClick={handleShare}
-                className="text-gray-500 hover:text-gray-700 hover:bg-gray-50"
+                className="text-gray-500 hover:text-gray-700 hover:bg-gray-50 "
               >
                 <Share className="w-4 h-4" />
               </Button>

@@ -82,11 +82,11 @@ const FeaturedCourses = () => {
 
   if (loading) {
     return (
-      <section className="py-16 bg-white">
+      <section className="py-16 bg-background">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">Featured Courses</h2>
-            <p className="text-xl text-gray-600">Loading courses...</p>
+            <h2 className="text-3xl font-bold text-foreground mb-4">Featured Courses</h2>
+            <p className="text-xl text-foreground">Loading courses...</p>
           </div>
         </div>
       </section>
@@ -94,11 +94,11 @@ const FeaturedCourses = () => {
   }
 
   return (
-    <section className="py-16 bg-white">
+    <section className="py-16 bg-background">
       <div className="container mx-auto px-4">
         <div className="text-center mb-12">
-          <h2 className="text-3xl font-bold text-gray-900 mb-4">Featured Courses</h2>
-          <p className="text-xl text-gray-600">Discover our most popular courses and start learning today</p>
+          <h2 className="text-3xl font-bold text-foreground mb-4">Featured Courses</h2>
+          <p className="text-xl text-foreground">Discover our most popular courses and start learning today</p>
         </div>
         
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -110,33 +110,33 @@ const FeaturedCourses = () => {
                   alt={course.name}
                   className="w-full h-48 object-cover rounded-t-lg"
                 />
-                <Badge className="absolute top-4 left-4 bg-purple-600">
+                <Badge className="absolute top-4 left-4 bg-purple-600 text-white">
                   Featured
                 </Badge>
               </div>
               
               <CardHeader>
                 <CardTitle className="text-xl">{course.name}</CardTitle>
-                <p className="text-gray-600">{course.description}</p>
+                <p className="text-gray-600 dark:text-gray-300">{course.description}</p>
               </CardHeader>
               
               <CardContent>
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center space-x-1">
                     <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                    <span className="text-sm font-medium">4.8</span>
-                    <span className="text-sm text-gray-500">(1,234)</span>
+                    <span className="text-sm font-medium text-gray-600 dark:text-gray-300">4.8</span>
+                    <span className="text-sm text-gray-600 dark:text-gray-300">(1,234)</span>
                   </div>
                   <div className="flex items-center space-x-1 text-gray-500">
                     <Users className="h-4 w-4" />
-                    <span className="text-sm">{course.views}</span>
+                    <span className="text-sm text-gray-600 dark:text-gray-300">{course.views}</span>
                   </div>
                 </div>
                 
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-1 text-gray-500">
                     <Clock className="h-4 w-4" />
-                    <span className="text-sm">12 hours</span>
+                    <span className="text-sm text-gray-600 dark:text-gray-300">12 hours</span>
                   </div>
                   <Link 
                     to={`/course/${course._id}`}

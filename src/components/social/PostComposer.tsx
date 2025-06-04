@@ -28,17 +28,17 @@ const PostComposer = () => {
               placeholder="What's happening in your learning journey?"
               value={postContent}
               onChange={(e) => setPostContent(e.target.value)}
-              className="border-none resize-none text-lg placeholder:text-gray-500 focus-visible:ring-0"
+              className="border-none resize-none text-lg placeholder:text-gray-400 focus-visible:ring-0"
               rows={3}
             />
             <div className="flex justify-between items-center mt-3">
-              <div className="text-sm text-gray-500">
+              <div className="text-sm text-gray-500 dark:text-gray-300">
                 {280 - postContent.length} characters remaining
               </div>
               <Button 
                 onClick={handlePost}
                 disabled={!postContent.trim() || postContent.length > 280}
-                className="bg-purple-600 hover:bg-purple-700"
+                className="bg-purple-600 hover:bg-purple-700 text-white"
               >
                 Post
               </Button>

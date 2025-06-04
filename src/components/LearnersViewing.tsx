@@ -47,9 +47,9 @@ const LearnersViewing = () => {
   ];
 
   return (
-    <section className="py-12 bg-gray-50">
+    <section className="py-12 bg-background">
       <div className="container mx-auto px-4">
-        <h2 className="text-3xl font-bold text-gray-900 mb-8">Learners are viewing</h2>
+        <h2 className="text-3xl font-bold text-gray-600 dark:text-white mb-8">Learners are viewing</h2>
         
         <div className="relative">
           {/* Navigation Arrows */}

@@ -68,21 +68,21 @@ const ContactUs = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background">
       <Header />
       
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-12">
-            <h1 className="text-4xl font-bold text-gray-900 mb-4">Contact Us</h1>
-            <p className="text-xl text-gray-600">
+            <h1 className="text-4xl font-bold text-gray-900 dark:text-gray-300 mb-4">Contact Us</h1>
+            <p className="text-xl text-gray-600 dark:text-gray-300">
               Have questions? We'd love to hear from you. Send us a message and we'll respond as soon as possible.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+          <div className="items-center justify-center ">
             {/* Contact Form */}
-            <Card>
+            {/* <Card>
               <CardHeader>
                 <CardTitle>Send us a Message</CardTitle>
               </CardHeader>
@@ -153,7 +153,7 @@ const ContactUs = () => {
                   </Button>
                 </form>
               </CardContent>
-            </Card>
+            </Card> */}
 
             {/* Contact Information */}
             <div className="space-y-8">
@@ -167,30 +167,21 @@ const ContactUs = () => {
                       <Mail className="h-6 w-6 text-purple-600" />
                     </div>
                     <div>
-                      <h3 className="font-semibold text-gray-900">Email</h3>
-                      <p className="text-gray-600">support@edulearn.com</p>
-                      <p className="text-sm text-gray-500">We'll respond within 24 hours</p>
+                      <h3 className="font-semibold text-gray-900 dark:text-gray-300">Email</h3>
+                      <p className="text-gray-600 dark:text-gray-300">support@edulearn.com</p>
+                      <p className="text-sm text-gray-500 dark:text-gray-300">We'll respond within 24 hours</p>
                     </div>
                   </div>
                   
-                  <div className="flex items-start space-x-4">
-                    <div className="bg-purple-100 p-3 rounded-lg">
-                      <Phone className="h-6 w-6 text-purple-600" />
-                    </div>
-                    <div>
-                      <h3 className="font-semibold text-gray-900">Phone</h3>
-                      <p className="text-gray-600">+1 (555) 123-4567</p>
-                      <p className="text-sm text-gray-500">Mon-Fri from 8am to 5pm</p>
-                    </div>
-                  </div>
+                  
                   
                   <div className="flex items-start space-x-4">
                     <div className="bg-purple-100 p-3 rounded-lg">
                       <MapPin className="h-6 w-6 text-purple-600" />
                     </div>
                     <div>
-                      <h3 className="font-semibold text-gray-900">Office</h3>
-                      <p className="text-gray-600">
+                      <h3 className="font-semibold text-gray-900 dark:text-gray-300">Office</h3>
+                      <p className="text-gray-600 dark:text-gray-300">
                         123 Learning Street<br />
                         Education City, EC 12345<br />
                         United States
@@ -207,16 +198,16 @@ const ContactUs = () => {
                 <CardContent>
                   <div className="space-y-4">
                     <div>
-                      <h4 className="font-medium text-gray-900">How do I reset my password?</h4>
-                      <p className="text-sm text-gray-600">Visit our forgot password page and follow the instructions.</p>
+                      <h4 className="font-medium text-gray-900 dark:text-gray-300">How do I reset my password?</h4>
+                      <p className="text-sm text-gray-600 dark:text-gray-300">Visit our forgot password page and follow the instructions.</p>
                     </div>
+                    {/* <div>
+                      <h4 className="font-medium text-gray-900 dark:text-gray-300">Can I get a refund?</h4>
+                      <p className="text-sm text-gray-600 dark:text-gray-300">Yes, we offer refunds within 30 days of purchase.</p>
+                    </div> */}
                     <div>
-                      <h4 className="font-medium text-gray-900">Can I get a refund?</h4>
-                      <p className="text-sm text-gray-600">Yes, we offer refunds within 30 days of purchase.</p>
-                    </div>
-                    <div>
-                      <h4 className="font-medium text-gray-900">How do I contact support?</h4>
-                      <p className="text-sm text-gray-600">Use this contact form or email us directly.</p>
+                      <h4 className="font-medium text-gray-900 dark:text-gray-300">How do I contact support?</h4>
+                      <p className="text-sm text-gray-600 dark:text-gray-300">Use this contact form or email us directly.</p>
                     </div>
                   </div>
                 </CardContent>

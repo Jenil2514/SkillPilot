@@ -41,10 +41,10 @@ const AuthPage = () => {
           toast.error('Passwords do not match');
           return;
         }
-        await authService.register({ 
-          name: formData.name, 
-          email: formData.email, 
-          password: formData.password 
+        await authService.register({
+          name: formData.name,
+          email: formData.email,
+          password: formData.password
         });
         toast.success('Registration successful! Please login.');
         setIsLogin(true);
@@ -73,9 +73,9 @@ const AuthPage = () => {
           </p>
         </div>
 
-        <Card>
+        <Card className='shadow-lg bg-white '>
           <CardHeader>
-            <CardTitle className="text-center">
+            <CardTitle className="text-center text-gray-900">
               {isLogin ? 'Sign In' : 'Create Account'}
             </CardTitle>
           </CardHeader>
@@ -84,7 +84,7 @@ const AuthPage = () => {
             <Button
               onClick={handleGoogleAuth}
               variant="outline"
-              className="w-full flex items-center justify-center space-x-2"
+              className="w-full flex items-center justify-center space-x-2 text-black dark:bg-white hover:text-black hover:dark:bg-blue-50 transition-colors border-gray-300"
               disabled={loading}
             >
               <svg className="w-5 h-5" viewBox="0 0 24 24">
@@ -116,10 +116,10 @@ const AuthPage = () => {
             </div>
 
             {/* Form */}
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={handleSubmit} className="space-y-4 ">
               {!isLogin && (
-                <div>
-                  <Label htmlFor="name">Full Name</Label>
+                <div >
+                  <Label className='dark:text-gray-600' htmlFor="name">Full Name</Label>
                   <Input
                     id="name"
                     name="name"
@@ -128,12 +128,13 @@ const AuthPage = () => {
                     onChange={handleInputChange}
                     required={!isLogin}
                     disabled={loading}
+                    className='dark:bg-white dark:text-black focus:outline-none focus:ring-0'
                   />
                 </div>
               )}
 
               <div>
-                <Label htmlFor="email">Email</Label>
+                <Label className='dark:text-gray-600' htmlFor="email">Email</Label>
                 <Input
                   id="email"
                   name="email"
@@ -142,11 +143,12 @@ const AuthPage = () => {
                   onChange={handleInputChange}
                   required
                   disabled={loading}
+                  className='dark:bg-white dark:text-black lable:text-black focus:outline-none focus:ring-0'
                 />
               </div>
 
               <div>
-                <Label htmlFor="password">Password</Label>
+                <Label className='dark:text-gray-600' htmlFor="password">Password</Label>
                 <Input
                   id="password"
                   name="password"
@@ -155,12 +157,14 @@ const AuthPage = () => {
                   onChange={handleInputChange}
                   required
                   disabled={loading}
+                  className='dark:bg-white dark:text-black lable:text-black focus:outline-none focus:ring-0'
+
                 />
               </div>
 
               {!isLogin && (
                 <div>
-                  <Label htmlFor="confirmPassword">Confirm Password</Label>
+                  <Label className='dark:text-gray-600' htmlFor="confirmPassword">Confirm Password</Label>
                   <Input
                     id="confirmPassword"
                     name="confirmPassword"
@@ -169,13 +173,15 @@ const AuthPage = () => {
                     onChange={handleInputChange}
                     required={!isLogin}
                     disabled={loading}
+                    className='dark:bg-white dark:text-black lable:text-black focus:outline-none focus:ring-0'
+
                   />
                 </div>
               )}
 
-              <Button 
-                type="submit" 
-                className="w-full bg-purple-600 hover:bg-purple-700"
+              <Button
+                type="submit"
+                className="w-full bg-purple-600 hover:bg-purple-700 text-white"
                 disabled={loading}
               >
                 {loading ? 'Processing...' : (isLogin ? 'Sign In' : 'Create Account')}

@@ -31,13 +31,13 @@ const CategoryPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-background">
       <Header />
       
       <div className="container mx-auto px-4 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 dark:bg-background">
           {/* Category Selector */}
-          <div className="lg:col-span-3">
+          <div className="lg:col-span-3 bg-gray-50 dark:bg-background">
             <CategorySelector 
               selectedCategory={selectedCategory}
               onCategorySelect={handleCategorySelect}
@@ -69,11 +69,11 @@ const CategoryPage = () => {
           {/* Other Categories Content */}
           {selectedCategory !== 'university' && (
             <div className="lg:col-span-9">
-              <div className="bg-white rounded-lg p-8 text-center">
-                <h2 className="text-2xl font-bold text-gray-800 mb-4">
+              <div className="bg-background rounded-lg p-8 text-center ">
+                <h2 className="text-2xl font-bold text-gray-800 dark:white mb-4">
                   {selectedCategory.charAt(0).toUpperCase() + selectedCategory.slice(1)} Category
                 </h2>
-                <p className="text-gray-600">
+                <p className="text-gray-600 dark:text-white">
                   Content for {selectedCategory} category coming soon...
                 </p>
               </div>

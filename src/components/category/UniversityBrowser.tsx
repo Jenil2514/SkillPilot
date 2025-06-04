@@ -118,10 +118,10 @@ const UniversityBrowser = ({
                 <button
                   key={university.id}
                   onClick={() => handleUniversityClick(university.id)}
-                  className="w-full flex items-center justify-between p-3 rounded-lg hover:bg-gray-100 text-left"
+                  className="w-full flex items-center justify-between p-3 rounded-lg hover:bg-purple-50 hover:bg-white hover:text-purple-600 text-left"
                 >
                   <span className="font-medium">{university.name}</span>
-                  <ChevronRight className="h-4 w-4 text-gray-400" />
+                  <ChevronRight className="h-4 w-4 text-purple-600" />
                 </button>
               ))}
               {filteredUniversities.length === 0 && (
@@ -148,7 +148,7 @@ const UniversityBrowser = ({
                   onOpenChange={() => toggleSemester(semester.id)}
                 >
                   <CollapsibleTrigger className="w-full">
-                    <div className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-100">
+                    <div className="flex items-center justify-between p-3 rounded-lg hover:bg-purple-50 hover:text-purple-600">
                       <span className="font-medium">{semester.name}</span>
                       <ChevronDown className={`h-4 w-4 transition-transform ${
                         openSemesters.includes(semester.id) ? 'rotate-180' : ''
@@ -161,7 +161,7 @@ const UniversityBrowser = ({
                         <button
                           key={course}
                           onClick={() => onSemesterCourseSelect(semester.name, course)}
-                          className="w-full text-left p-2 rounded hover:bg-blue-50 text-sm"
+                          className="w-full text-left p-2 rounded hover:bg-blue-50 text-sm hover:bg-white hover:text-purple-600"
                         >
                           {course}
                         </button>

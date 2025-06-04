@@ -112,7 +112,7 @@ const ProfilePage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background">
       <Header />
       
       <div className="container mx-auto px-4 py-8">
@@ -130,17 +130,17 @@ const ProfilePage = () => {
                           {getUserInitials(profileData.name)}
                         </AvatarFallback>
                       </Avatar>
-                      <button
+                      {/* <button
                         onClick={handleAvatarChange}
                         className="absolute bottom-0 right-0 bg-purple-600 hover:bg-purple-700 text-white p-2 rounded-full"
                       >
                         <Camera className="w-4 h-4" />
-                      </button>
+                      </button> */}
                     </div>
                     
-                    <h2 className="text-xl font-bold mt-4">{profileData.name || 'User'}</h2>
-                    <p className="text-gray-600">{profileData.email}</p>
-                    <p className="text-sm text-gray-500 mt-2">Member since {profileData.joinDate}</p>
+                    <h2 className="text-xl font-bold mt-4 dark:text-gray-300">{profileData.name || 'User'}</h2>
+                    <p className="text-gray-600 dark:text-gray-300">{profileData.email}</p>
+                    <p className="text-sm text-gray-500 mt-2 dark:text-gray-300">Member since {profileData.joinDate}</p>
                     
                     {!isEditing && (
                       <Button
@@ -157,26 +157,26 @@ const ProfilePage = () => {
               </Card>
 
               {/* Quick Stats */}
-              <Card className="mt-6">
+              <Card className="mt-6 ">
                 <CardHeader>
                   <CardTitle>Learning Stats</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
                     <div className="flex justify-between">
-                      <span className="text-gray-600">Courses Completed</span>
+                      <span className="text-gray-600 dark:text-gray-300">Courses Completed</span>
                       <span className="font-semibold">{profileData.stats.coursesCompleted}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-gray-600">Hours Learned</span>
+                      <span className="text-gray-600 dark:text-gray-300">Hours Learned</span>
                       <span className="font-semibold">{profileData.stats.hoursLearned}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-gray-600">Certificates Earned</span>
+                      <span className="text-gray-600 dark:text-gray-300">Certificates Earned</span>
                       <span className="font-semibold">{profileData.stats.certificates}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-gray-600">Current Streak</span>
+                      <span className="text-gray-600 dark:text-gray-300">Current Streak</span>
                       <span className="font-semibold">{profileData.stats.currentStreak} days</span>
                     </div>
                   </div>

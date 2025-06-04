@@ -4,7 +4,7 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import CourseCard from '@/components/CourseCard';
 import { Button } from '@/components/ui/button';
-import axios from 'axios';
+import courseService from '@/services/courseService';
 
 interface Course {
   id: string;
@@ -24,8 +24,19 @@ const SavedCourses = () => {
   useEffect(() => {
     const fetchSavedCourses = async () => {
       try {
-        const response = await axios.get('/api/users/saved-courses');
-        setSavedCourses(response.data);
+        const courses = await courseService.getSavedCourses();
+        // Transform the API response to match our Course interface
+        const transformedCourses = courses.map(course => ({
+          id: course._id,
+          title: course.name,
+          instructor: "Various Instructors", // Since the backend doesn't have instructor field
+          rating: 4.5 + Math.random() * 0.5, // Mock rating
+          reviewCount: (Math.floor(Math.random() * 100000) + 10000).toLocaleString(),
+          price: "$" + (Math.floor(Math.random() * 50) + 50) + ".99",
+          image: course.image || "/placeholder.svg",
+          badge: Math.random() > 0.7 ? "Bestseller" : undefined
+        }));
+        setSavedCourses(transformedCourses);
       } catch (error) {
         console.log('API call failed, using mock data:', error);
         // Mock data as fallback
@@ -70,7 +81,7 @@ const SavedCourses = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-background">
         <Header />
         <div className="container mx-auto px-4 py-8">
           <div className="text-center">Loading saved courses...</div>
@@ -81,16 +92,16 @@ const SavedCourses = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background">
       <Header />
       
       <div className="container mx-auto px-4 py-8">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">My Saved Courses</h1>
-          <p className="text-gray-600">Courses you've bookmarked for later</p>
+          <h1 className="text-3xl font-bold text-foreground mb-2">My Saved Courses</h1>
+          <p className="text-muted-foreground">Courses you've bookmarked for later</p>
         </div>
 
-        {savedCourses.length > 0 ? (
+        {Array.isArray(savedCourses) && savedCourses.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {savedCourses.map((course) => (
               <CourseCard
@@ -109,12 +120,12 @@ const SavedCourses = () => {
           <div className="text-center py-16">
             <div className="max-w-md mx-auto">
               <div className="mb-4">
-                <div className="w-24 h-24 bg-gray-200 rounded-full mx-auto flex items-center justify-center">
+                <div className="w-24 h-24 bg-muted rounded-full mx-auto flex items-center justify-center">
                   <span className="text-4xl">📚</span>
                 </div>
               </div>
-              <h2 className="text-2xl font-bold text-gray-800 mb-2">No saved courses yet</h2>
-              <p className="text-gray-600 mb-6">
+              <h2 className="text-2xl font-bold text-foreground mb-2">No saved courses yet</h2>
+              <p className="text-muted-foreground mb-6">
                 Start exploring courses and save the ones you're interested in for later.
               </p>
               <Button className="bg-purple-600 hover:bg-purple-700">
