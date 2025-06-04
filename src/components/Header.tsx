@@ -23,8 +23,8 @@ const Header = () => {
               <Link to="/social" className="text-gray-700 hover:text-purple-600 transition-colors">
                 Community
               </Link>
-              <Link to="/shorts" className="text-gray-700 hover:text-purple-600 transition-colors">
-                Shorts
+              <Link to="/contact" className="text-gray-700 hover:text-purple-600 transition-colors">
+                Contact
               </Link>
             </nav>
           </div>
@@ -42,15 +42,6 @@ const Header = () => {
 
           {/* Right Navigation */}
           <div className="flex items-center space-x-4">
-            <button className="hidden lg:block text-gray-700 hover:text-purple-600 transition-colors">
-              Plans & Pricing
-            </button>
-            <button className="hidden lg:block text-gray-700 hover:text-purple-600 transition-colors">
-              EduLearn Business
-            </button>
-            <button className="hidden lg:block text-gray-700 hover:text-purple-600 transition-colors">
-              Teach on EduLearn
-            </button>
             <Link to="/saved-courses" className="p-2">
               <Bookmark className="h-5 w-5 text-gray-700" />
             </Link>

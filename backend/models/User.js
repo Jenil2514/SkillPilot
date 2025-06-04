@@ -1,3 +1,4 @@
+
 import mongoose from 'mongoose';
 
 const userSchema = new mongoose.Schema({
@@ -14,6 +15,24 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true
   },
+  bio: {
+    type: String,
+    default: ''
+  },
+  location: {
+    type: String,
+    default: ''
+  },
+  website: {
+    type: String,
+    default: ''
+  },
+  resetPasswordOTP: {
+    type: String
+  },
+  resetPasswordExpires: {
+    type: Date
+  },
   savedCourses: [{
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Course'
@@ -24,9 +43,11 @@ const userSchema = new mongoose.Schema({
     default: 'user'
   },
   progress: [{
-  course: { type: mongoose.Schema.Types.ObjectId, ref: 'Course' },
-  completedCheckpoints: [{ type: mongoose.Schema.Types.ObjectId }]  // checkpoint _id from course
-}],
+    course: { type: mongoose.Schema.Types.ObjectId, ref: 'Course' },
+    completedCheckpoints: [{ type: mongoose.Schema.Types.ObjectId }]
+  }],
+}, {
+  timestamps: true
 });
 
 const User = mongoose.model('User', userSchema);

@@ -1,13 +1,15 @@
 
-import React, { useState } from 'react';
+import React from 'react';
+import { Link } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Heart, MessageCircle, Repeat, Share } from 'lucide-react';
+import { Heart, MessageCircle, Repeat2, Share } from 'lucide-react';
 
 interface Post {
   id: number;
   user: {
+    id?: string;
     name: string;
     username: string;
     avatar: string;
@@ -26,55 +28,69 @@ interface PostCardProps {
 }
 
 const PostCard = ({ post }: PostCardProps) => {
-  const [likes, setLikes] = useState(post.likes);
-  const [reposts, setReposts] = useState(post.reposts);
-  const [isLiked, setIsLiked] = useState(post.isLiked);
-  const [isReposted, setIsReposted] = useState(post.isReposted);
-
   const handleLike = () => {
-    if (isLiked) {
-      setLikes(likes - 1);
-    } else {
-      setLikes(likes + 1);
-    }
-    setIsLiked(!isLiked);
+    // TODO: Implement like functionality
+    console.log('Like clicked for post:', post.id);
   };
 
   const handleRepost = () => {
-    if (isReposted) {
-      setReposts(reposts - 1);
-    } else {
-      setReposts(reposts + 1);
-    }
-    setIsReposted(!isReposted);
+    // TODO: Implement repost functionality
+    console.log('Repost clicked for post:', post.id);
+  };
+
+  const handleComment = () => {
+    // TODO: Implement comment functionality
+    console.log('Comment clicked for post:', post.id);
+  };
+
+  const handleShare = () => {
+    // TODO: Implement share functionality
+    console.log('Share clicked for post:', post.id);
+  };
+
+  const getUserInitials = (name: string) => {
+    return name.split(' ').map(n => n[0]).join('').toUpperCase();
   };
 
   return (
-    <Card className="hover:bg-gray-50 transition-colors cursor-pointer">
-      <CardContent className="p-4">
+    <Card className="hover:shadow-md transition-shadow">
+      <CardContent className="pt-6">
         <div className="flex space-x-3">
-          <Avatar>
-            <AvatarImage src={post.user.avatar} />
-            <AvatarFallback>{post.user.name.charAt(0)}</AvatarFallback>
-          </Avatar>
+          <Link to={post.user.id ? `/user/${post.user.id}` : '#'} className="flex-shrink-0">
+            <Avatar className="w-10 h-10">
+              <AvatarImage src={post.user.avatar} alt={post.user.name} />
+              <AvatarFallback>{getUserInitials(post.user.name)}</AvatarFallback>
+            </Avatar>
+          </Link>
           
-          <div className="flex-1">
-            <div className="flex items-center space-x-2 mb-1">
-              <span className="font-bold text-gray-900">{post.user.name}</span>
-              <span className="text-gray-500">@{post.user.username}</span>
+          <div className="flex-1 space-y-3">
+            <div className="flex items-center space-x-2">
+              <Link 
+                to={post.user.id ? `/user/${post.user.id}` : '#'} 
+                className="font-semibold text-gray-900 hover:text-purple-600 transition-colors"
+              >
+                {post.user.name}
+              </Link>
+              <Link 
+                to={post.user.id ? `/user/${post.user.id}` : '#'} 
+                className="text-gray-500 hover:text-purple-600 transition-colors"
+              >
+                @{post.user.username}
+              </Link>
               <span className="text-gray-500">·</span>
-              <span className="text-gray-500">{post.timestamp}</span>
+              <span className="text-gray-500 text-sm">{post.timestamp}</span>
             </div>
             
-            <p className="text-gray-900 mb-3 leading-relaxed">{post.content}</p>
+            <p className="text-gray-800 leading-relaxed">{post.content}</p>
             
-            <div className="flex items-center justify-between max-w-md">
+            <div className="flex items-center justify-between pt-2 max-w-md">
               <Button
                 variant="ghost"
                 size="sm"
-                className="text-gray-500 hover:text-blue-600 hover:bg-blue-50 p-2"
+                onClick={handleComment}
+                className="text-gray-500 hover:text-blue-600 hover:bg-blue-50"
               >
-                <MessageCircle className="h-4 w-4 mr-1" />
+                <MessageCircle className="w-4 h-4 mr-1" />
                 <span className="text-sm">{post.comments}</span>
               </Button>
               
@@ -82,36 +98,33 @@ const PostCard = ({ post }: PostCardProps) => {
                 variant="ghost"
                 size="sm"
                 onClick={handleRepost}
-                className={`p-2 ${
-                  isReposted 
-                    ? 'text-green-600 hover:text-green-700 hover:bg-green-50' 
-                    : 'text-gray-500 hover:text-green-600 hover:bg-green-50'
+                className={`text-gray-500 hover:text-green-600 hover:bg-green-50 ${
+                  post.isReposted ? 'text-green-600' : ''
                 }`}
               >
-                <Repeat className="h-4 w-4 mr-1" />
-                <span className="text-sm">{reposts}</span>
+                <Repeat2 className="w-4 h-4 mr-1" />
+                <span className="text-sm">{post.reposts}</span>
               </Button>
               
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={handleLike}
-                className={`p-2 ${
-                  isLiked 
-                    ? 'text-red-600 hover:text-red-700 hover:bg-red-50' 
-                    : 'text-gray-500 hover:text-red-600 hover:bg-red-50'
+                className={`text-gray-500 hover:text-red-600 hover:bg-red-50 ${
+                  post.isLiked ? 'text-red-600' : ''
                 }`}
               >
-                <Heart className={`h-4 w-4 mr-1 ${isLiked ? 'fill-current' : ''}`} />
-                <span className="text-sm">{likes}</span>
+                <Heart className={`w-4 h-4 mr-1 ${post.isLiked ? 'fill-current' : ''}`} />
+                <span className="text-sm">{post.likes}</span>
               </Button>
               
               <Button
                 variant="ghost"
                 size="sm"
-                className="text-gray-500 hover:text-blue-600 hover:bg-blue-50 p-2"
+                onClick={handleShare}
+                className="text-gray-500 hover:text-gray-700 hover:bg-gray-50"
               >
-                <Share className="h-4 w-4" />
+                <Share className="w-4 h-4" />
               </Button>
             </div>
           </div>
