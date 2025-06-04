@@ -4,6 +4,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/component
 import { ChevronDown, ChevronUp, ExternalLink, ThumbsUp, MessageCircle, Star, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
+import { Checkbox } from '@/components/ui/checkbox';
 
 interface CourseLink {
   id: string;
@@ -34,6 +35,7 @@ const CourseContent = () => {
   const [upvotedLinks, setUpvotedLinks] = useState<string[]>([]);
   const [showComments, setShowComments] = useState<string | null>(null);
   const [newComment, setNewComment] = useState('');
+  const [completedTopics, setCompletedTopics] = useState<string[]>(['01']);
 
   const courseTopics: CourseTopic[] = [
     {
@@ -115,6 +117,14 @@ const CourseContent = () => {
     );
   };
 
+  const handleTopicComplete = (topicId: string, checked: boolean) => {
+    setCompletedTopics(prev => 
+      checked
+        ? [...prev, topicId]
+        : prev.filter(id => id !== topicId)
+    );
+  };
+
   const handleUpvote = (linkId: string) => {
     setUpvotedLinks(prev => 
       prev.includes(linkId)
@@ -125,7 +135,6 @@ const CourseContent = () => {
 
   const handleAddComment = (linkId: string) => {
     if (newComment.trim()) {
-      // In a real app, this would call an API
       console.log(`Adding comment to link ${linkId}: ${newComment}`);
       setNewComment('');
     }
@@ -165,6 +174,11 @@ const CourseContent = () => {
                     <CollapsibleTrigger className="w-full">
                       <div className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50">
                         <div className="flex items-center space-x-3">
+                          <Checkbox
+                            checked={completedTopics.includes(topic.id)}
+                            onCheckedChange={(checked) => handleTopicComplete(topic.id, checked as boolean)}
+                            onClick={(e) => e.stopPropagation()}
+                          />
                           <span className="font-bold text-lg">{topic.id}</span>
                           <div className="text-left">
                             <h3 className="font-semibold">{topic.title}</h3>

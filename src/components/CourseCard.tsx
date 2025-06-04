@@ -1,6 +1,7 @@
 
-import { Star } from "lucide-react";
+import { Star, Bookmark } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useState } from "react";
 
 interface CourseCardProps {
   title: string;
@@ -13,6 +14,15 @@ interface CourseCardProps {
 }
 
 const CourseCard = ({ title, instructor, rating, reviewCount, price, image, badge }: CourseCardProps) => {
+  const [isBookmarked, setIsBookmarked] = useState(false);
+
+  const handleBookmark = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsBookmarked(!isBookmarked);
+    console.log(`Course ${isBookmarked ? 'removed from' : 'added to'} bookmarks: ${title}`);
+  };
+
   return (
     <Link to="/course/1" className="block">
       <div className="bg-white rounded-lg shadow-sm hover:shadow-lg transition-shadow cursor-pointer group">
@@ -27,6 +37,14 @@ const CourseCard = ({ title, instructor, rating, reviewCount, price, image, badg
               {badge}
             </span>
           )}
+          <button
+            onClick={handleBookmark}
+            className="absolute top-2 right-2 p-2 rounded-full bg-white/80 hover:bg-white transition-colors"
+          >
+            <Bookmark 
+              className={`h-4 w-4 ${isBookmarked ? 'fill-purple-600 text-purple-600' : 'text-gray-600'}`} 
+            />
+          </button>
         </div>
         
         <div className="p-4">
