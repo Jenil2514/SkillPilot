@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
@@ -9,7 +10,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Camera, Edit, Save, X } from 'lucide-react';
-import axios from 'axios';
+import api from '@/services/api';
 
 const ProfilePage = () => {
   const [isEditing, setIsEditing] = useState(false);
@@ -32,7 +33,7 @@ const ProfilePage = () => {
   useEffect(() => {
     const fetchProfileData = async () => {
       try {
-        const response = await axios.get('/api/users/profile');
+        const response = await api.get('/users/profile');
         setProfileData(response.data);
       } catch (error) {
         console.log('API call failed, using mock data:', error);
@@ -68,7 +69,7 @@ const ProfilePage = () => {
 
   const handleSave = async () => {
     try {
-      await axios.put('/api/users/profile', profileData);
+      await api.put('/users/profile', profileData);
       console.log('Profile updated successfully');
       setIsEditing(false);
     } catch (error) {
@@ -86,10 +87,16 @@ const ProfilePage = () => {
     try {
       // This would typically open a file picker and upload the image
       console.log('Avatar change triggered');
-      // await axios.post('/api/users/avatar', formData);
+      // await api.post('/users/avatar', formData);
     } catch (error) {
       console.log('Failed to update avatar:', error);
     }
+  };
+
+  // Helper function to get user initials safely
+  const getUserInitials = (name: string) => {
+    if (!name || typeof name !== 'string') return 'JD';
+    return name.split(' ').map(n => n[0]).join('').toUpperCase();
   };
 
   if (loading) {
@@ -118,9 +125,9 @@ const ProfilePage = () => {
                   <div className="text-center">
                     <div className="relative inline-block">
                       <Avatar className="w-24 h-24 mx-auto">
-                        <AvatarImage src="/placeholder.svg" alt={profileData.name} />
+                        <AvatarImage src="/placeholder.svg" alt={profileData.name || 'User'} />
                         <AvatarFallback className="text-2xl">
-                          {profileData.name.split(' ').map(n => n[0]).join('')}
+                          {getUserInitials(profileData.name)}
                         </AvatarFallback>
                       </Avatar>
                       <button
@@ -131,7 +138,7 @@ const ProfilePage = () => {
                       </button>
                     </div>
                     
-                    <h2 className="text-xl font-bold mt-4">{profileData.name}</h2>
+                    <h2 className="text-xl font-bold mt-4">{profileData.name || 'User'}</h2>
                     <p className="text-gray-600">{profileData.email}</p>
                     <p className="text-sm text-gray-500 mt-2">Member since {profileData.joinDate}</p>
                     
