@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import PostCard from './PostCard';
-import axios from 'axios';
+import api from '@/services/api';
 
 interface Post {
   id: number;
@@ -26,11 +26,16 @@ const PostFeed = () => {
   useEffect(() => {
     const fetchPosts = async () => {
       try {
-        const response = await axios.get('/api/social/posts');
-        setPosts(response.data);
+        // Use the correct backend endpoint that matches your community routes
+        const response = await api.get('/community');
+        console.log('API response:', response.data);
+        
+        // Ensure response.data is an array
+        const postsData = Array.isArray(response.data) ? response.data : [];
+        setPosts(postsData);
       } catch (error) {
         console.log('API call failed, using mock data:', error);
-        // Mock data as fallback
+        // Mock data as fallback - ensure it's always an array
         setPosts([
           {
             id: 1,
@@ -111,9 +116,12 @@ const PostFeed = () => {
 
   return (
     <div className="space-y-4">
-      {posts.map((post) => (
+      {Array.isArray(posts) && posts.map((post) => (
         <PostCard key={post.id} post={post} />
       ))}
+      {(!Array.isArray(posts) || posts.length === 0) && (
+        <div className="text-center text-gray-500">No posts available</div>
+      )}
     </div>
   );
 };
