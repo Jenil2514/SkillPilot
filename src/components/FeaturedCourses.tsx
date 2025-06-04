@@ -23,7 +23,11 @@ const FeaturedCourses = () => {
     const fetchFeaturedCourses = async () => {
       try {
         const response = await axios.get('/api/courses/featured');
-        setCourses(response.data);
+        console.log('API response:', response.data);
+        
+        // Ensure we have an array
+        const coursesData = Array.isArray(response.data) ? response.data : response.data.courses || [];
+        setCourses(coursesData);
       } catch (error) {
         console.log('API call failed, using mock data:', error);
         // Mock data as fallback
@@ -88,6 +92,18 @@ const FeaturedCourses = () => {
       <section className="py-12 bg-white">
         <div className="container mx-auto px-4">
           <div className="text-center">Loading featured courses...</div>
+        </div>
+      </section>
+    );
+  }
+
+  // Additional safety check
+  if (!Array.isArray(courses)) {
+    console.error('Courses is not an array:', courses);
+    return (
+      <section className="py-12 bg-white">
+        <div className="container mx-auto px-4">
+          <div className="text-center">Error loading courses. Please try again later.</div>
         </div>
       </section>
     );
