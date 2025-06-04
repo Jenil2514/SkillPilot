@@ -1,5 +1,4 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -10,17 +9,55 @@ import { Textarea } from '@/components/ui/textarea';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Camera, Edit, Save, X } from 'lucide-react';
+import axios from 'axios';
 
 const ProfilePage = () => {
   const [isEditing, setIsEditing] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [profileData, setProfileData] = useState({
-    name: 'John Doe',
-    email: 'john.doe@example.com',
-    bio: 'Passionate learner and technology enthusiast. Currently studying web development and machine learning.',
-    location: 'San Francisco, CA',
-    website: 'https://johndoe.dev',
-    joinDate: 'January 2024'
+    name: '',
+    email: '',
+    bio: '',
+    location: '',
+    website: '',
+    joinDate: '',
+    stats: {
+      coursesCompleted: 0,
+      hoursLearned: 0,
+      certificates: 0,
+      currentStreak: 0
+    }
   });
+
+  useEffect(() => {
+    const fetchProfileData = async () => {
+      try {
+        const response = await axios.get('/api/users/profile');
+        setProfileData(response.data);
+      } catch (error) {
+        console.log('API call failed, using mock data:', error);
+        // Mock data as fallback
+        setProfileData({
+          name: 'John Doe',
+          email: 'john.doe@example.com',
+          bio: 'Passionate learner and technology enthusiast. Currently studying web development and machine learning.',
+          location: 'San Francisco, CA',
+          website: 'https://johndoe.dev',
+          joinDate: 'January 2024',
+          stats: {
+            coursesCompleted: 12,
+            hoursLearned: 156,
+            certificates: 8,
+            currentStreak: 15
+          }
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProfileData();
+  }, []);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setProfileData({
@@ -29,20 +66,43 @@ const ProfilePage = () => {
     });
   };
 
-  const handleSave = () => {
-    console.log('Profile updated:', profileData);
-    setIsEditing(false);
+  const handleSave = async () => {
+    try {
+      await axios.put('/api/users/profile', profileData);
+      console.log('Profile updated successfully');
+      setIsEditing(false);
+    } catch (error) {
+      console.log('Failed to update profile:', error);
+      setIsEditing(false);
+    }
   };
 
   const handleCancel = () => {
     setIsEditing(false);
-    // Reset form data here if needed
+    // Reset form data if needed
   };
 
-  const handleAvatarChange = () => {
-    console.log('Avatar change triggered');
-    // Handle avatar upload logic
+  const handleAvatarChange = async () => {
+    try {
+      // This would typically open a file picker and upload the image
+      console.log('Avatar change triggered');
+      // await axios.post('/api/users/avatar', formData);
+    } catch (error) {
+      console.log('Failed to update avatar:', error);
+    }
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Header />
+        <div className="container mx-auto px-4 py-8">
+          <div className="text-center">Loading profile...</div>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -98,19 +158,19 @@ const ProfilePage = () => {
                   <div className="space-y-4">
                     <div className="flex justify-between">
                       <span className="text-gray-600">Courses Completed</span>
-                      <span className="font-semibold">12</span>
+                      <span className="font-semibold">{profileData.stats.coursesCompleted}</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-gray-600">Hours Learned</span>
-                      <span className="font-semibold">156</span>
+                      <span className="font-semibold">{profileData.stats.hoursLearned}</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-gray-600">Certificates Earned</span>
-                      <span className="font-semibold">8</span>
+                      <span className="font-semibold">{profileData.stats.certificates}</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-gray-600">Current Streak</span>
-                      <span className="font-semibold">15 days</span>
+                      <span className="font-semibold">{profileData.stats.currentStreak} days</span>
                     </div>
                   </div>
                 </CardContent>
