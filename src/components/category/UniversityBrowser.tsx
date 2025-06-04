@@ -1,8 +1,8 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { ChevronDown, ChevronRight } from 'lucide-react';
+import { ChevronDown, ChevronRight, Search } from 'lucide-react';
+import { Input } from '@/components/ui/input';
 
 interface UniversityBrowserProps {
   selectedUniversity: string;
@@ -16,6 +16,7 @@ const UniversityBrowser = ({
   onSemesterCourseSelect 
 }: UniversityBrowserProps) => {
   const [openSemesters, setOpenSemesters] = useState<string[]>([]);
+  const [searchTerm, setSearchTerm] = useState('');
 
   const universities = [
     {
@@ -73,6 +74,10 @@ const UniversityBrowser = ({
     }
   ];
 
+  const filteredUniversities = universities.filter(university =>
+    university.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   const toggleSemester = (semesterId: string) => {
     setOpenSemesters(prev =>
       prev.includes(semesterId)
@@ -83,7 +88,6 @@ const UniversityBrowser = ({
 
   const handleUniversityClick = (universityId: string) => {
     onUniversitySelect(universityId);
-    // Clear semester selections when switching universities
     setOpenSemesters([]);
   };
 
@@ -96,17 +100,34 @@ const UniversityBrowser = ({
       </CardHeader>
       <CardContent>
         {!selectedUniversity ? (
-          <div className="space-y-2">
-            {universities.map((university) => (
-              <button
-                key={university.id}
-                onClick={() => handleUniversityClick(university.id)}
-                className="w-full flex items-center justify-between p-3 rounded-lg hover:bg-gray-100 text-left"
-              >
-                <span className="font-medium">{university.name}</span>
-                <ChevronRight className="h-4 w-4 text-gray-400" />
-              </button>
-            ))}
+          <div className="space-y-4">
+            {/* Search Input */}
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+              <Input 
+                placeholder="Search universities..." 
+                className="pl-10"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
+            
+            {/* University List */}
+            <div className="space-y-2">
+              {filteredUniversities.map((university) => (
+                <button
+                  key={university.id}
+                  onClick={() => handleUniversityClick(university.id)}
+                  className="w-full flex items-center justify-between p-3 rounded-lg hover:bg-gray-100 text-left"
+                >
+                  <span className="font-medium">{university.name}</span>
+                  <ChevronRight className="h-4 w-4 text-gray-400" />
+                </button>
+              ))}
+              {filteredUniversities.length === 0 && (
+                <p className="text-gray-500 text-center py-4">No universities found</p>
+              )}
+            </div>
           </div>
         ) : (
           <div>

@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
+
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { ChevronDown, ChevronUp, ExternalLink, ThumbsUp, MessageCircle, Star, Clock } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
+import { Star, Clock } from 'lucide-react';
+import CourseTopicItem from './CourseTopicItem';
+import axios from 'axios';
 
 interface CourseLink {
   id: string;
@@ -34,78 +34,74 @@ const CourseContent = () => {
   const [upvotedLinks, setUpvotedLinks] = useState<string[]>([]);
   const [showComments, setShowComments] = useState<string | null>(null);
   const [newComment, setNewComment] = useState('');
+  const [completedTopics, setCompletedTopics] = useState<string[]>(['01']);
+  const [courseTopics, setCourseTopics] = useState<CourseTopic[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const courseTopics: CourseTopic[] = [
-    {
-      id: '01',
-      title: 'Introduction to Web Development',
-      description: 'Learn web architecture essentials and set up the development environment.',
-      isCompleted: true,
-      links: [
-        {
-          id: '1',
-          title: 'HTML Basics Tutorial',
-          url: 'https://www.youtube.com/watch?v=example1',
-          type: 'youtube',
-          upvotes: 42,
-          comments: [
-            { id: '1', user: 'John Doe', content: 'Great explanation of HTML fundamentals!', timestamp: '2 hours ago' },
-            { id: '2', user: 'Jane Smith', content: 'This helped me understand semantic HTML better.', timestamp: '1 day ago' }
-          ]
-        },
-        {
-          id: '2',
-          title: 'CSS Fundamentals Guide',
-          url: 'https://developer.mozilla.org/en-US/docs/Web/CSS',
-          type: 'documentation',
-          upvotes: 38,
-          comments: []
-        }
-      ]
-    },
-    {
-      id: '02',
-      title: 'Frontend Development',
-      description: 'Master React, JavaScript, and modern frontend frameworks.',
-      isCompleted: false,
-      links: [
-        {
-          id: '3',
-          title: 'React Complete Tutorial',
-          url: 'https://www.youtube.com/watch?v=example2',
-          type: 'youtube',
-          upvotes: 156,
-          comments: [
-            { id: '3', user: 'Mike Johnson', content: 'Best React tutorial I have found!', timestamp: '3 hours ago' }
-          ]
-        },
-        {
-          id: '4',
-          title: 'JavaScript ES6+ Features',
-          url: 'https://github.com/example/js-es6',
-          type: 'github',
-          upvotes: 89,
-          comments: []
-        }
-      ]
-    },
-    {
-      id: '03',
-      title: 'Backend Development',
-      description: 'Learn Node.js, Express, and database management.',
-      isCompleted: false,
-      links: [
-        {
-          id: '5',
-          title: 'Node.js Crash Course',
-          url: 'https://www.youtube.com/watch?v=example3',
-          type: 'youtube',
-          upvotes: 203,
-          comments: []
-        }
-      ]
-    }
-  ];
+  // API call to fetch course content
+  useEffect(() => {
+    const fetchCourseContent = async () => {
+      try {
+        // Temporary API endpoint - replace with actual backend URL
+        const response = await axios.get('/api/courses/1/content');
+        setCourseTopics(response.data);
+      } catch (error) {
+        console.log('API call failed, using mock data:', error);
+        // Mock data as fallback
+        setCourseTopics([
+          {
+            id: '01',
+            title: 'Introduction to Web Development',
+            description: 'Learn web architecture essentials and set up the development environment.',
+            isCompleted: true,
+            links: [
+              {
+                id: '1',
+                title: 'HTML Basics Tutorial',
+                url: 'https://www.youtube.com/watch?v=example1',
+                type: 'youtube',
+                upvotes: 42,
+                comments: [
+                  { id: '1', user: 'John Doe', content: 'Great explanation of HTML fundamentals!', timestamp: '2 hours ago' },
+                  { id: '2', user: 'Jane Smith', content: 'This helped me understand semantic HTML better.', timestamp: '1 day ago' }
+                ]
+              },
+              {
+                id: '2',
+                title: 'CSS Fundamentals Guide',
+                url: 'https://developer.mozilla.org/en-US/docs/Web/CSS',
+                type: 'documentation',
+                upvotes: 38,
+                comments: []
+              }
+            ]
+          },
+          {
+            id: '02',
+            title: 'Frontend Development',
+            description: 'Master React, JavaScript, and modern frontend frameworks.',
+            isCompleted: false,
+            links: [
+              {
+                id: '3',
+                title: 'React Complete Tutorial',
+                url: 'https://www.youtube.com/watch?v=example2',
+                type: 'youtube',
+                upvotes: 156,
+                comments: [
+                  { id: '3', user: 'Mike Johnson', content: 'Best React tutorial I have found!', timestamp: '3 hours ago' }
+                ]
+              }
+            ]
+          }
+        ]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCourseContent();
+  }, []);
 
   const toggleSection = (sectionId: string) => {
     setOpenSections(prev => 
@@ -115,34 +111,72 @@ const CourseContent = () => {
     );
   };
 
-  const handleUpvote = (linkId: string) => {
-    setUpvotedLinks(prev => 
-      prev.includes(linkId)
-        ? prev.filter(id => id !== linkId)
-        : [...prev, linkId]
-    );
+  const handleTopicComplete = async (topicId: string, checked: boolean) => {
+    try {
+      // API call to update topic completion
+      await axios.post(`/api/courses/1/topics/${topicId}/complete`, { completed: checked });
+      
+      setCompletedTopics(prev => 
+        checked
+          ? [...prev, topicId]
+          : prev.filter(id => id !== topicId)
+      );
+    } catch (error) {
+      console.log('Failed to update topic completion:', error);
+      // Update locally as fallback
+      setCompletedTopics(prev => 
+        checked
+          ? [...prev, topicId]
+          : prev.filter(id => id !== topicId)
+      );
+    }
   };
 
-  const handleAddComment = (linkId: string) => {
+  const handleUpvote = async (linkId: string) => {
+    try {
+      // API call to upvote link
+      await axios.post(`/api/links/${linkId}/upvote`);
+      
+      setUpvotedLinks(prev => 
+        prev.includes(linkId)
+          ? prev.filter(id => id !== linkId)
+          : [...prev, linkId]
+      );
+    } catch (error) {
+      console.log('Failed to upvote link:', error);
+      // Update locally as fallback
+      setUpvotedLinks(prev => 
+        prev.includes(linkId)
+          ? prev.filter(id => id !== linkId)
+          : [...prev, linkId]
+      );
+    }
+  };
+
+  const handleAddComment = async (linkId: string) => {
     if (newComment.trim()) {
-      // In a real app, this would call an API
-      console.log(`Adding comment to link ${linkId}: ${newComment}`);
-      setNewComment('');
+      try {
+        // API call to add comment
+        await axios.post(`/api/links/${linkId}/comments`, { content: newComment });
+        
+        console.log(`Adding comment to link ${linkId}: ${newComment}`);
+        setNewComment('');
+      } catch (error) {
+        console.log('Failed to add comment:', error);
+        setNewComment('');
+      }
     }
   };
 
-  const getTypeIcon = (type: string) => {
-    switch (type) {
-      case 'youtube':
-        return '📺';
-      case 'github':
-        return '⚡';
-      case 'documentation':
-        return '📚';
-      default:
-        return '🔗';
-    }
-  };
+  if (loading) {
+    return (
+      <section className="py-12 bg-gray-50">
+        <div className="container mx-auto px-4">
+          <div className="text-center">Loading course content...</div>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section className="py-12 bg-gray-50">
@@ -157,110 +191,21 @@ const CourseContent = () => {
               </CardHeader>
               <CardContent className="space-y-4">
                 {courseTopics.map((topic) => (
-                  <Collapsible 
+                  <CourseTopicItem
                     key={topic.id}
-                    open={openSections.includes(topic.id)}
-                    onOpenChange={() => toggleSection(topic.id)}
-                  >
-                    <CollapsibleTrigger className="w-full">
-                      <div className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50">
-                        <div className="flex items-center space-x-3">
-                          <span className="font-bold text-lg">{topic.id}</span>
-                          <div className="text-left">
-                            <h3 className="font-semibold">{topic.title}</h3>
-                            <p className="text-sm text-gray-600">{topic.description}</p>
-                          </div>
-                        </div>
-                        {openSections.includes(topic.id) ? 
-                          <ChevronUp className="h-5 w-5" /> : 
-                          <ChevronDown className="h-5 w-5" />
-                        }
-                      </div>
-                    </CollapsibleTrigger>
-                    
-                    <CollapsibleContent className="pt-4">
-                      <div className="space-y-4 pl-8">
-                        {topic.links.map((link) => (
-                          <div key={link.id} className="border rounded-lg p-4 bg-white">
-                            <div className="flex items-center justify-between mb-3">
-                              <div className="flex items-center space-x-3">
-                                <span className="text-xl">{getTypeIcon(link.type)}</span>
-                                <div>
-                                  <h4 className="font-medium">{link.title}</h4>
-                                  <a 
-                                    href={link.url} 
-                                    target="_blank" 
-                                    rel="noopener noreferrer"
-                                    className="text-blue-600 hover:underline text-sm flex items-center"
-                                  >
-                                    View Resource <ExternalLink className="h-3 w-3 ml-1" />
-                                  </a>
-                                </div>
-                              </div>
-                              
-                              <div className="flex items-center space-x-2">
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  onClick={() => handleUpvote(link.id)}
-                                  className={upvotedLinks.includes(link.id) ? 'bg-blue-50 border-blue-300' : ''}
-                                >
-                                  <ThumbsUp className={`h-4 w-4 mr-1 ${upvotedLinks.includes(link.id) ? 'fill-blue-500 text-blue-500' : ''}`} />
-                                  {link.upvotes + (upvotedLinks.includes(link.id) ? 1 : 0)}
-                                </Button>
-                                
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  onClick={() => setShowComments(showComments === link.id ? null : link.id)}
-                                >
-                                  <MessageCircle className="h-4 w-4 mr-1" />
-                                  {link.comments.length}
-                                </Button>
-                              </div>
-                            </div>
-                            
-                            {/* Comments Section */}
-                            {showComments === link.id && (
-                              <div className="mt-4 border-t pt-4">
-                                <h5 className="font-medium mb-3">Comments</h5>
-                                
-                                {/* Add Comment */}
-                                <div className="mb-4">
-                                  <Textarea
-                                    placeholder="Add a comment..."
-                                    value={newComment}
-                                    onChange={(e) => setNewComment(e.target.value)}
-                                    className="mb-2"
-                                  />
-                                  <Button 
-                                    size="sm" 
-                                    onClick={() => handleAddComment(link.id)}
-                                    disabled={!newComment.trim()}
-                                  >
-                                    Post Comment
-                                  </Button>
-                                </div>
-                                
-                                {/* Existing Comments */}
-                                <div className="space-y-3">
-                                  {link.comments.map((comment) => (
-                                    <div key={comment.id} className="bg-gray-50 p-3 rounded">
-                                      <div className="flex justify-between items-start mb-2">
-                                        <span className="font-medium text-sm">{comment.user}</span>
-                                        <span className="text-xs text-gray-500">{comment.timestamp}</span>
-                                      </div>
-                                      <p className="text-sm">{comment.content}</p>
-                                    </div>
-                                  ))}
-                                </div>
-                              </div>
-                            )}
-                          </div>
-                        ))}
-                      </div>
-                    </CollapsibleContent>
-                  </Collapsible>
+                    topic={topic}
+                    isOpen={openSections.includes(topic.id)}
+                    isCompleted={completedTopics.includes(topic.id)}
+                    onToggle={() => toggleSection(topic.id)}
+                    onTopicComplete={(checked) => handleTopicComplete(topic.id, checked)}
+                    upvotedLinks={upvotedLinks}
+                    onUpvote={handleUpvote}
+                    showComments={showComments}
+                    setShowComments={setShowComments}
+                    newComment={newComment}
+                    setNewComment={setNewComment}
+                    onAddComment={handleAddComment}
+                  />
                 ))}
               </CardContent>
             </Card>

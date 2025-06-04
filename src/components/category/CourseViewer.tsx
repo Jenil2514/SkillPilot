@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { ThumbsUp, MessageCircle, Plus, ExternalLink, Youtube } from 'lucide-react';
+import axios from 'axios';
 
 interface Source {
   id: string;
@@ -31,37 +32,12 @@ interface CourseViewerProps {
 }
 
 const CourseViewer = ({ university, semester, course }: CourseViewerProps) => {
-  const [sources, setSources] = useState<Source[]>([
-    {
-      id: '1',
-      title: 'CS50 Introduction to Computer Science',
-      url: 'https://www.youtube.com/watch?v=example',
-      description: 'Harvard CS50 full course - comprehensive introduction to computer science',
-      tags: ['beginner', 'fundamentals', 'harvard'],
-      upvotes: 245,
-      comments: [
-        { id: '1', user: 'student123', content: 'Excellent course!', timestamp: '2 hours ago' }
-      ],
-      addedBy: 'john_doe',
-      type: 'youtube'
-    },
-    {
-      id: '2',
-      title: 'MDN Web Development Guide',
-      url: 'https://developer.mozilla.org/en-US/docs/Learn',
-      description: 'Comprehensive web development documentation and tutorials',
-      tags: ['web', 'documentation', 'reference'],
-      upvotes: 156,
-      comments: [],
-      addedBy: 'jane_smith',
-      type: 'documentation'
-    }
-  ]);
-
+  const [sources, setSources] = useState<Source[]>([]);
   const [upvotedSources, setUpvotedSources] = useState<string[]>([]);
   const [showAddSource, setShowAddSource] = useState(false);
   const [showComments, setShowComments] = useState<string | null>(null);
   const [newComment, setNewComment] = useState('');
+  const [loading, setLoading] = useState(true);
 
   // Add source form state
   const [newSource, setNewSource] = useState({
@@ -71,38 +47,120 @@ const CourseViewer = ({ university, semester, course }: CourseViewerProps) => {
     tags: ''
   });
 
-  const handleUpvote = (sourceId: string) => {
-    setUpvotedSources(prev =>
-      prev.includes(sourceId)
-        ? prev.filter(id => id !== sourceId)
-        : [...prev, sourceId]
-    );
-  };
+  // Fetch sources from API
+  useEffect(() => {
+    const fetchSources = async () => {
+      try {
+        const response = await axios.get(`/api/universities/${university}/semesters/${semester}/courses/${course}/sources`);
+        setSources(response.data);
+      } catch (error) {
+        console.log('API call failed, using mock data:', error);
+        // Mock data as fallback
+        setSources([
+          {
+            id: '1',
+            title: 'CS50 Introduction to Computer Science',
+            url: 'https://www.youtube.com/watch?v=example',
+            description: 'Harvard CS50 full course - comprehensive introduction to computer science',
+            tags: ['beginner', 'fundamentals', 'harvard'],
+            upvotes: 245,
+            comments: [
+              { id: '1', user: 'student123', content: 'Excellent course!', timestamp: '2 hours ago' }
+            ],
+            addedBy: 'john_doe',
+            type: 'youtube'
+          },
+          {
+            id: '2',
+            title: 'MDN Web Development Guide',
+            url: 'https://developer.mozilla.org/en-US/docs/Learn',
+            description: 'Comprehensive web development documentation and tutorials',
+            tags: ['web', 'documentation', 'reference'],
+            upvotes: 156,
+            comments: [],
+            addedBy: 'jane_smith',
+            type: 'documentation'
+          }
+        ]);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  const handleAddSource = () => {
-    if (newSource.title && newSource.url && newSource.description) {
-      const source: Source = {
-        id: Date.now().toString(),
-        title: newSource.title,
-        url: newSource.url,
-        description: newSource.description,
-        tags: newSource.tags.split(',').map(tag => tag.trim()).filter(tag => tag),
-        upvotes: 0,
-        comments: [],
-        addedBy: 'current_user',
-        type: newSource.url.includes('youtube') ? 'youtube' : 'other'
-      };
+    if (university && semester && course) {
+      fetchSources();
+    }
+  }, [university, semester, course]);
 
-      setSources(prev => [source, ...prev]);
-      setNewSource({ title: '', url: '', description: '', tags: '' });
-      setShowAddSource(false);
+  const handleUpvote = async (sourceId: string) => {
+    try {
+      await axios.post(`/api/sources/${sourceId}/upvote`);
+      
+      setUpvotedSources(prev =>
+        prev.includes(sourceId)
+          ? prev.filter(id => id !== sourceId)
+          : [...prev, sourceId]
+      );
+    } catch (error) {
+      console.log('Failed to upvote source:', error);
+      // Update locally as fallback
+      setUpvotedSources(prev =>
+        prev.includes(sourceId)
+          ? prev.filter(id => id !== sourceId)
+          : [...prev, sourceId]
+      );
     }
   };
 
-  const handleAddComment = (sourceId: string) => {
+  const handleAddSource = async () => {
+    if (newSource.title && newSource.url && newSource.description) {
+      try {
+        const sourceData = {
+          title: newSource.title,
+          url: newSource.url,
+          description: newSource.description,
+          tags: newSource.tags.split(',').map(tag => tag.trim()).filter(tag => tag),
+          type: newSource.url.includes('youtube') ? 'youtube' : 'other'
+        };
+
+        const response = await axios.post(`/api/universities/${university}/semesters/${semester}/courses/${course}/sources`, sourceData);
+        
+        setSources(prev => [response.data, ...prev]);
+        setNewSource({ title: '', url: '', description: '', tags: '' });
+        setShowAddSource(false);
+      } catch (error) {
+        console.log('Failed to add source:', error);
+        // Add locally as fallback
+        const source: Source = {
+          id: Date.now().toString(),
+          title: newSource.title,
+          url: newSource.url,
+          description: newSource.description,
+          tags: newSource.tags.split(',').map(tag => tag.trim()).filter(tag => tag),
+          upvotes: 0,
+          comments: [],
+          addedBy: 'current_user',
+          type: newSource.url.includes('youtube') ? 'youtube' : 'other'
+        };
+
+        setSources(prev => [source, ...prev]);
+        setNewSource({ title: '', url: '', description: '', tags: '' });
+        setShowAddSource(false);
+      }
+    }
+  };
+
+  const handleAddComment = async (sourceId: string) => {
     if (newComment.trim()) {
-      console.log(`Adding comment to source ${sourceId}: ${newComment}`);
-      setNewComment('');
+      try {
+        await axios.post(`/api/sources/${sourceId}/comments`, { content: newComment });
+        
+        console.log(`Adding comment to source ${sourceId}: ${newComment}`);
+        setNewComment('');
+      } catch (error) {
+        console.log('Failed to add comment:', error);
+        setNewComment('');
+      }
     }
   };
 
@@ -116,6 +174,16 @@ const CourseViewer = ({ university, semester, course }: CourseViewerProps) => {
         return <span className="text-gray-500">🔗</span>;
     }
   };
+
+  if (loading) {
+    return (
+      <Card>
+        <CardContent className="p-6">
+          <div className="text-center">Loading course sources...</div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card>

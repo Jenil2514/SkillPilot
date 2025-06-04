@@ -1,7 +1,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Search, ShoppingCart, Globe } from "lucide-react";
+import { Search, ShoppingCart, Globe, User, Bookmark } from "lucide-react";
 import { Link } from "react-router-dom";
 
 const Header = () => {
@@ -51,15 +51,25 @@ const Header = () => {
             <button className="hidden lg:block text-gray-700 hover:text-purple-600 transition-colors">
               Teach on EduLearn
             </button>
+            <Link to="/saved-courses" className="p-2">
+              <Bookmark className="h-5 w-5 text-gray-700" />
+            </Link>
             <button className="p-2">
               <ShoppingCart className="h-5 w-5 text-gray-700" />
             </button>
-            <Button variant="outline" className="hidden md:inline-flex">
-              Log in
-            </Button>
-            <Button className="bg-purple-600 hover:bg-purple-700">
-              Sign up
-            </Button>
+            <Link to="/auth">
+              <Button variant="outline" className="hidden md:inline-flex">
+                Log in
+              </Button>
+            </Link>
+            <Link to="/auth">
+              <Button className="bg-purple-600 hover:bg-purple-700">
+                Sign up
+              </Button>
+            </Link>
+            <Link to="/profile" className="p-2">
+              <User className="h-5 w-5 text-gray-700" />
+            </Link>
             <button className="p-2">
               <Globe className="h-5 w-5 text-gray-700" />
             </button>
