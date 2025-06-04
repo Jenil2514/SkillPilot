@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Star, Clock } from 'lucide-react';
@@ -44,10 +43,12 @@ const CourseContent = () => {
       try {
         // Temporary API endpoint - replace with actual backend URL
         const response = await axios.get('/api/courses/1/content');
-        setCourseTopics(response.data);
+        // Ensure response.data is an array
+        const topicsData = Array.isArray(response.data) ? response.data : [];
+        setCourseTopics(topicsData);
       } catch (error) {
         console.log('API call failed, using mock data:', error);
-        // Mock data as fallback
+        // Mock data as fallback - ensure it's always an array
         setCourseTopics([
           {
             id: '01',
@@ -190,7 +191,7 @@ const CourseContent = () => {
                 <p className="text-gray-600">7 sections • 42 lectures • 87.6 total hours</p>
               </CardHeader>
               <CardContent className="space-y-4">
-                {courseTopics.map((topic) => (
+                {Array.isArray(courseTopics) && courseTopics.map((topic) => (
                   <CourseTopicItem
                     key={topic.id}
                     topic={topic}

@@ -52,10 +52,12 @@ const CourseViewer = ({ university, semester, course }: CourseViewerProps) => {
     const fetchSources = async () => {
       try {
         const response = await axios.get(`/api/universities/${university}/semesters/${semester}/courses/${course}/sources`);
-        setSources(response.data);
+        // Ensure response.data is an array
+        const sourcesData = Array.isArray(response.data) ? response.data : [];
+        setSources(sourcesData);
       } catch (error) {
         console.log('API call failed, using mock data:', error);
-        // Mock data as fallback
+        // Mock data as fallback - ensure it's always an array
         setSources([
           {
             id: '1',
@@ -89,6 +91,8 @@ const CourseViewer = ({ university, semester, course }: CourseViewerProps) => {
 
     if (university && semester && course) {
       fetchSources();
+    } else {
+      setLoading(false);
     }
   }, [university, semester, course]);
 
@@ -261,9 +265,9 @@ const CourseViewer = ({ university, semester, course }: CourseViewerProps) => {
 
         {/* Sources List */}
         <div className="space-y-4">
-          <h3 className="font-semibold text-lg">Learning Sources ({sources.length})</h3>
+          <h3 className="font-semibold text-lg">Learning Sources ({Array.isArray(sources) ? sources.length : 0})</h3>
           
-          {sources.map((source) => (
+          {Array.isArray(sources) && sources.map((source) => (
             <Card key={source.id} className="border-gray-200">
               <CardContent className="p-4">
                 <div className="flex items-start justify-between mb-3">
@@ -281,7 +285,7 @@ const CourseViewer = ({ university, semester, course }: CourseViewerProps) => {
                         Visit Source <ExternalLink className="h-3 w-3 ml-1" />
                       </a>
                       <div className="flex flex-wrap gap-1 mt-2">
-                        {source.tags.map((tag) => (
+                        {Array.isArray(source.tags) && source.tags.map((tag) => (
                           <span
                             key={tag}
                             className="bg-gray-100 text-gray-700 px-2 py-1 rounded-full text-xs"
@@ -311,7 +315,7 @@ const CourseViewer = ({ university, semester, course }: CourseViewerProps) => {
                       onClick={() => setShowComments(showComments === source.id ? null : source.id)}
                     >
                       <MessageCircle className="h-4 w-4 mr-1" />
-                      {source.comments.length}
+                      {Array.isArray(source.comments) ? source.comments.length : 0}
                     </Button>
                   </div>
                 </div>
@@ -340,7 +344,7 @@ const CourseViewer = ({ university, semester, course }: CourseViewerProps) => {
 
                     {/* Existing Comments */}
                     <div className="space-y-3">
-                      {source.comments.map((comment) => (
+                      {Array.isArray(source.comments) && source.comments.map((comment) => (
                         <div key={comment.id} className="bg-gray-50 p-3 rounded">
                           <div className="flex justify-between items-start mb-2">
                             <span className="font-medium text-sm">{comment.user}</span>
