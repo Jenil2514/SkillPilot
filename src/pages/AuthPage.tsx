@@ -5,10 +5,14 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { toast } from 'sonner';
+import authService from '@/services/authService';
 
 const AuthPage = () => {
   const [isLogin, setIsLogin] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -23,13 +27,38 @@ const AuthPage = () => {
     });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log(isLogin ? 'Login submitted' : 'Register submitted', formData);
+    setLoading(true);
+
+    try {
+      if (isLogin) {
+        await authService.login({ email: formData.email, password: formData.password });
+        toast.success('Login successful!');
+        navigate('/');
+      } else {
+        if (formData.password !== formData.confirmPassword) {
+          toast.error('Passwords do not match');
+          return;
+        }
+        await authService.register({ 
+          name: formData.name, 
+          email: formData.email, 
+          password: formData.password 
+        });
+        toast.success('Registration successful! Please login.');
+        setIsLogin(true);
+        setFormData({ name: '', email: '', password: '', confirmPassword: '' });
+      }
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || 'An error occurred');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleGoogleAuth = () => {
-    console.log('Google authentication triggered');
+    toast.info('Google authentication not implemented yet');
   };
 
   return (
@@ -37,7 +66,7 @@ const AuthPage = () => {
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <Link to="/">
-            <h1 className="text-3xl font-bold text-purple-600">EduLearn</h1>
+            <h1 className="text-3xl font-bold text-purple-600">SkillUP</h1>
           </Link>
           <p className="text-gray-600 mt-2">
             {isLogin ? 'Welcome back!' : 'Join our learning community'}
@@ -56,6 +85,7 @@ const AuthPage = () => {
               onClick={handleGoogleAuth}
               variant="outline"
               className="w-full flex items-center justify-center space-x-2"
+              disabled={loading}
             >
               <svg className="w-5 h-5" viewBox="0 0 24 24">
                 <path
@@ -97,6 +127,7 @@ const AuthPage = () => {
                     value={formData.name}
                     onChange={handleInputChange}
                     required={!isLogin}
+                    disabled={loading}
                   />
                 </div>
               )}
@@ -110,6 +141,7 @@ const AuthPage = () => {
                   value={formData.email}
                   onChange={handleInputChange}
                   required
+                  disabled={loading}
                 />
               </div>
 
@@ -122,6 +154,7 @@ const AuthPage = () => {
                   value={formData.password}
                   onChange={handleInputChange}
                   required
+                  disabled={loading}
                 />
               </div>
 
@@ -135,12 +168,17 @@ const AuthPage = () => {
                     value={formData.confirmPassword}
                     onChange={handleInputChange}
                     required={!isLogin}
+                    disabled={loading}
                   />
                 </div>
               )}
 
-              <Button type="submit" className="w-full bg-purple-600 hover:bg-purple-700">
-                {isLogin ? 'Sign In' : 'Create Account'}
+              <Button 
+                type="submit" 
+                className="w-full bg-purple-600 hover:bg-purple-700"
+                disabled={loading}
+              >
+                {loading ? 'Processing...' : (isLogin ? 'Sign In' : 'Create Account')}
               </Button>
             </form>
 
@@ -152,6 +190,7 @@ const AuthPage = () => {
               <button
                 onClick={() => setIsLogin(!isLogin)}
                 className="text-purple-600 hover:underline font-medium"
+                disabled={loading}
               >
                 {isLogin ? 'Sign up' : 'Sign in'}
               </button>
