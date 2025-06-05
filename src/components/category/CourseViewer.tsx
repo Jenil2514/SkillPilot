@@ -5,39 +5,57 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { ThumbsUp, MessageCircle, Plus, ExternalLink, Youtube } from 'lucide-react';
 import axios from 'axios';
+import { Resource, Comment, CourseData, SemesterData, } from '@/components/types/type';
+import { CourseViewerProps } from '@/components/types/type';
+import { University } from '@/components/types/type';
+import { toast } from '@/hooks/use-toast';
 
-interface Source {
-  id: string;
-  title: string;
-  url: string;
-  description: string;
-  tags: string[];
-  upvotes: number;
-  comments: Comment[];
-  addedBy: string;
-  type: 'youtube' | 'article' | 'documentation' | 'other';
-}
+// import { CourseData } from '@/components/types/type';
 
-interface Comment {
-  id: string;
-  user: string;
-  content: string;
-  timestamp: string;
-}
-
-interface CourseViewerProps {
-  university: string;
-  semester: string;
-  course: string;
-}
-
-const CourseViewer = ({ university, semester, course }: CourseViewerProps) => {
-  const [sources, setSources] = useState<Source[]>([]);
+const CourseViewer = ({ university, selectedSemester, selectedCourse }: CourseViewerProps) => {
+  const [sources, setResources] = useState<Resource[]>([]);
   const [upvotedSources, setUpvotedSources] = useState<string[]>([]);
   const [showAddSource, setShowAddSource] = useState(false);
-  const [showComments, setShowComments] = useState<string | null>(null);
-  const [newComment, setNewComment] = useState('');
-  const [loading, setLoading] = useState(true);
+  const [universityData, setUniversityData] = useState<University | null>(null);
+  const [courseData, setcourseData] = useState<CourseData[]>([]);
+  const [semesterData, setsemesterData] = useState<SemesterData[]>([]);
+
+
+  useEffect(() => {
+    setUniversityData(university);
+    setsemesterData(university.semesters);
+    setcourseData(university.semesters.flatMap(semester => semester.courses));
+    // If you want to log the updated courseData, use a separate useEffect below
+  }, [university]);
+
+  // Optional: If you want to log courseData when it changes, use this effect
+  useEffect(() => {
+    // console.log("courseData", courseData);
+  }, [courseData]);
+  // console.log('University Data:', universityData);
+  // console.log('Selected Semester:', selectedSemester);
+  // console.log('Selected Course:', selectedCourse);
+
+  // Flatten all resources from all courses and keep course info with each resource
+  const allResources = courseData.flatMap(course =>
+    course.resources.map(resource => ({
+      courseId: course._id,
+      courseName: course.name,
+      courseDescription: course.description,
+      ...resource
+    }))
+  );
+
+  // Now you can use allResources as a flat array of resources with course info
+  // console.log(allResources);
+
+  // Example: Store in state if needed
+  const [flattenedResources, setFlattenedResources] = useState<typeof allResources>([]);
+
+  useEffect(() => {
+    setFlattenedResources(allResources);
+  }, [courseData]);
+
 
   // Add source form state
   const [newSource, setNewSource] = useState({
@@ -47,75 +65,65 @@ const CourseViewer = ({ university, semester, course }: CourseViewerProps) => {
     tags: ''
   });
 
-  // Fetch sources from API
-  useEffect(() => {
-    const fetchSources = async () => {
-      try {
-        const response = await axios.get(`/api/universities/${university}/semesters/${semester}/courses/${course}/sources`);
-        // Ensure response.data is an array
-        const sourcesData = Array.isArray(response.data) ? response.data : [];
-        setSources(sourcesData);
-      } catch (error) {
-        console.log('API call failed, using mock data:', error);
-        // Mock data as fallback - ensure it's always an array
-        setSources([
-          {
-            id: '1',
-            title: 'CS50 Introduction to Computer Science',
-            url: 'https://www.youtube.com/watch?v=example',
-            description: 'Harvard CS50 full course - comprehensive introduction to computer science',
-            tags: ['beginner', 'fundamentals', 'harvard'],
-            upvotes: 245,
-            comments: [
-              { id: '1', user: 'student123', content: 'Excellent course!', timestamp: '2 hours ago' }
-            ],
-            addedBy: 'john_doe',
-            type: 'youtube'
-          },
-          {
-            id: '2',
-            title: 'MDN Web Development Guide',
-            url: 'https://developer.mozilla.org/en-US/docs/Learn',
-            description: 'Comprehensive web development documentation and tutorials',
-            tags: ['web', 'documentation', 'reference'],
-            upvotes: 156,
-            comments: [],
-            addedBy: 'jane_smith',
-            type: 'documentation'
-          }
-        ]);
-      } finally {
-        setLoading(false);
-      }
-    };
 
-    if (university && semester && course) {
-      fetchSources();
-    } else {
-      setLoading(false);
-    }
-  }, [university, semester, course]);
 
+  // LEft off here: Implement upvote functionality------------------------------------
   const handleUpvote = async (sourceId: string) => {
+    // Find the courseId for this resource
+    const course = courseData.find(c => c.resources.some(r => r._id === sourceId));
+    const courseId = course?._id;
+    const resourceId = sourceId;
+
+    if (!courseId) {
+      console.error('Course ID not found for resource:', sourceId);
+      return;
+    }
+
+    const apiUrl = import.meta.env.VITE_BACKEND_URI || 'http://localhost:5000';
+
     try {
-      await axios.post(`/api/sources/${sourceId}/upvote`);
-      
-      setUpvotedSources(prev =>
-        prev.includes(sourceId)
-          ? prev.filter(id => id !== sourceId)
-          : [...prev, sourceId]
+      const response = await axios.post(
+        `${apiUrl}/api/courses/${courseId}/resources/${resourceId}/upvote`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`
+          }
+        }
       );
-    } catch (error) {
-      console.log('Failed to upvote source:', error);
-      // Update locally as fallback
-      setUpvotedSources(prev =>
-        prev.includes(sourceId)
-          ? prev.filter(id => id !== sourceId)
-          : [...prev, sourceId]
+      // Use backend upvote count
+      const newUpvotes = response.data.upvotes;
+      setcourseData(prevCourseData =>
+        prevCourseData.map(course => ({
+          ...course,
+          resources: course.resources.map(resource =>
+            resource._id === sourceId
+              ? { ...resource, upvotes: newUpvotes }
+              : resource
+          ),
+        }))
       );
+      setUpvotedSources(prev => [...prev, sourceId]);
+    } catch (error: unknown) {
+      if (
+        typeof error === "object" &&
+        error !== null &&
+        "response" in error &&
+        (error as { response?: { status?: number } }).response?.status === 400
+      ) {
+        toast({
+          title: "Already upvoted",
+          description: "You have already upvoted this resource.",
+        });
+        setUpvotedSources(prev => [...prev, sourceId]);
+      } else {
+        console.error('Failed to upvote:', error);
+      }
     }
   };
 
+
+  //------------------------------------Done ADD RESOURCE------------------------------------
   const handleAddSource = async () => {
     if (newSource.title && newSource.url && newSource.description) {
       try {
@@ -126,17 +134,17 @@ const CourseViewer = ({ university, semester, course }: CourseViewerProps) => {
           tags: newSource.tags.split(',').map(tag => tag.trim()).filter(tag => tag),
           type: newSource.url.includes('youtube') ? 'youtube' : 'other'
         };
+        const courseid = selectedCourse// Assuming you want to add to the first course of the first semester
+        const response = await axios.post(`/api/courses/${courseid}/resource`, sourceData);
 
-        const response = await axios.post(`/api/universities/${university}/semesters/${semester}/courses/${course}/sources`, sourceData);
-        
-        setSources(prev => [response.data, ...prev]);
+        setResources(prev => [response.data, ...prev]);
         setNewSource({ title: '', url: '', description: '', tags: '' });
         setShowAddSource(false);
       } catch (error) {
         console.log('Failed to add source:', error);
         // Add locally as fallback
-        const source: Source = {
-          id: Date.now().toString(),
+        const source: Resource = {
+          _id: Date.now().toString(),
           title: newSource.title,
           url: newSource.url,
           description: newSource.description,
@@ -144,33 +152,21 @@ const CourseViewer = ({ university, semester, course }: CourseViewerProps) => {
           upvotes: 0,
           comments: [],
           addedBy: 'current_user',
-          type: newSource.url.includes('youtube') ? 'youtube' : 'other'
+          type: newSource.url.includes('youtube') ? 'video' : 'other'
         };
 
-        setSources(prev => [source, ...prev]);
+        setResources(prev => [source, ...prev]);
         setNewSource({ title: '', url: '', description: '', tags: '' });
         setShowAddSource(false);
       }
     }
   };
 
-  const handleAddComment = async (sourceId: string) => {
-    if (newComment.trim()) {
-      try {
-        await axios.post(`/api/sources/${sourceId}/comments`, { content: newComment });
-        
-        console.log(`Adding comment to source ${sourceId}: ${newComment}`);
-        setNewComment('');
-      } catch (error) {
-        console.log('Failed to add comment:', error);
-        setNewComment('');
-      }
-    }
-  };
+
 
   const getSourceIcon = (type: string) => {
     switch (type) {
-      case 'youtube':
+      case 'video':
         return <Youtube className="h-5 w-5 text-red-500" />;
       case 'documentation':
         return <span className="text-blue-500">📚</span>;
@@ -179,23 +175,27 @@ const CourseViewer = ({ university, semester, course }: CourseViewerProps) => {
     }
   };
 
-  if (loading) {
-    return (
-      <Card>
-        <CardContent className="p-6">
-          <div className="text-foreground">Loading course sources...</div>
-        </CardContent>
-      </Card>
-    );
-  }
+
+
+
+
+  // Find the selected course
+  const selectedCourseData = courseData.find(course => course._id === selectedCourse);
+
+  // Use the resources of the selected course, or an empty array if not found
+  const selectedCourseResources = selectedCourseData ? selectedCourseData.resources : [];
 
   return (
     <Card>
       <CardHeader>
         <div className="flex items-center justify-between">
           <div>
-            <CardTitle>{course}</CardTitle>
-            <p className="text-sm text-gray-600 mt-1">{university} • {semester}</p>
+            <CardTitle>
+              {selectedCourseData ? selectedCourseData.name : ''}
+            </CardTitle>
+            <p className="text-sm text-gray-600 mt-1">
+              {universityData ? universityData.name : ''} • Semester:{universityData?.semesters.find(semester => semester._id === selectedSemester)?.number || 'N/A'}
+            </p>
           </div>
           <Button
             onClick={() => setShowAddSource(!showAddSource)}
@@ -220,6 +220,7 @@ const CourseViewer = ({ university, semester, course }: CourseViewerProps) => {
                 <Input
                   placeholder="Enter source title"
                   value={newSource.title}
+                  required={true}
                   onChange={(e) => setNewSource(prev => ({ ...prev, title: e.target.value }))}
                 />
               </div>
@@ -229,6 +230,7 @@ const CourseViewer = ({ university, semester, course }: CourseViewerProps) => {
                 <Input
                   placeholder="https://..."
                   value={newSource.url}
+                  required={true}
                   onChange={(e) => setNewSource(prev => ({ ...prev, url: e.target.value }))}
                 />
               </div>
@@ -238,6 +240,7 @@ const CourseViewer = ({ university, semester, course }: CourseViewerProps) => {
                 <Textarea
                   placeholder="Describe what this source covers..."
                   value={newSource.description}
+                  required={true}
                   onChange={(e) => setNewSource(prev => ({ ...prev, description: e.target.value }))}
                 />
               </div>
@@ -247,6 +250,7 @@ const CourseViewer = ({ university, semester, course }: CourseViewerProps) => {
                 <Input
                   placeholder="beginner, tutorial, advanced (comma separated)"
                   value={newSource.tags}
+                  required={true}
                   onChange={(e) => setNewSource(prev => ({ ...prev, tags: e.target.value }))}
                 />
               </div>
@@ -265,10 +269,11 @@ const CourseViewer = ({ university, semester, course }: CourseViewerProps) => {
 
         {/* Sources List */}
         <div className="space-y-4">
-          <h3 className="font-semibold text-lg">Learning Sources ({Array.isArray(sources) ? sources.length : 0})</h3>
-          
-          {Array.isArray(sources) && sources.map((source) => (
-            <Card key={source.id} className="border-gray-200">
+          <h3 className="font-semibold text-lg">
+            Learning Sources ({selectedCourseResources.length})
+          </h3>
+          {selectedCourseResources.map((source) => (
+            <Card key={source._id} className="border-gray-200">
               <CardContent className="p-4">
                 <div className="flex items-start justify-between mb-3">
                   <div className="flex items-start space-x-3 flex-1">
@@ -302,50 +307,44 @@ const CourseViewer = ({ university, semester, course }: CourseViewerProps) => {
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => handleUpvote(source.id)}
-                      className={upvotedSources.includes(source.id) ? 'bg-blue-50 border-blue-300' : ''}
+                      onClick={() => handleUpvote(source._id)}
+                      className={upvotedSources.includes(source._id) ? 'bg-blue-50 border-blue-300 dark:text-black hover:dark:text-white': ''}
                     >
-                      <ThumbsUp className={`h-4 w-4 mr-1 ${upvotedSources.includes(source.id) ? 'fill-blue-500 text-blue-500' : ''}`} />
-                      {source.upvotes + (upvotedSources.includes(source.id) ? 1 : 0)}
+                      <ThumbsUp className={`h-4 w-4 mr-1 ${upvotedSources.includes(source._id) ? 'fill-blue-500 text-blue-500' : ''}`} />
+                      {source.upvotes}
                     </Button>
 
-                    <Button
+                    {/* <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => setShowComments(showComments === source.id ? null : source.id)}
+                      onClick={() => setShowComments(showComments === source._id ? null : source._id)}
                     >
                       <MessageCircle className="h-4 w-4 mr-1" />
                       {Array.isArray(source.comments) ? source.comments.length : 0}
-                    </Button>
+                    </Button> */}
                   </div>
                 </div>
 
                 {/* Comments Section */}
-                {showComments === source.id && (
+                {/* {showComments === source._id && (
                   <div className="mt-4 border-t pt-4">
-                    <h5 className="font-medium mb-3">Comments</h5>
+                    <h5 className="font-medium mb-3">Comments</h5> */}
 
-                    {/* Add Comment */}
-                    <div className="mb-4">
+                {/* Add Comment */}
+                {/* <div className="mb-4">
                       <Textarea
                         placeholder="Add a comment..."
                         value={newComment}
                         onChange={(e) => setNewComment(e.target.value)}
                         className="mb-2"
                       />
-                      <Button
-                        size="sm"
-                        onClick={() => handleAddComment(source.id)}
-                        disabled={!newComment.trim()}
-                      >
-                        Post Comment
-                      </Button>
-                    </div>
+                      
+                    </div> */}
 
-                    {/* Existing Comments */}
-                    <div className="space-y-3">
+                {/* Existing Comments */}
+                {/* <div className="space-y-3">
                       {Array.isArray(source.comments) && source.comments.map((comment) => (
-                        <div key={comment.id} className="bg-gray-50 p-3 rounded">
+                        <div key={comment._id} className="bg-gray-50 p-3 rounded">
                           <div className="flex justify-between items-start mb-2">
                             <span className="font-medium text-sm">{comment.user}</span>
                             <span className="text-xs text-gray-500">{comment.timestamp}</span>
@@ -355,7 +354,7 @@ const CourseViewer = ({ university, semester, course }: CourseViewerProps) => {
                       ))}
                     </div>
                   </div>
-                )}
+                )} */}
               </CardContent>
             </Card>
           ))}

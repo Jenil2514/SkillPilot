@@ -6,6 +6,8 @@ const commentSchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now }
 });
 
+
+
 const resourceSchema = new mongoose.Schema({
   title: String,
   url: String,
@@ -13,12 +15,20 @@ const resourceSchema = new mongoose.Schema({
   tags: [String],
   user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }, // who added resource
   upvotes: { type: Number, default: 0 },
-  comments: [commentSchema]
+  upvotedBy: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }], // <-- Add this line
+  comments: [commentSchema],
+  type: { type: String, enum: ['video', 'article', 'documentation', 'other'], default: 'other' },
 });
+
+
+
 const checkpointSchema = new mongoose.Schema({
   title: String,
   resources: [{ type: mongoose.Schema.Types.ObjectId }]  // resource IDs
 });
+
+
+
 const courseSchema = new mongoose.Schema({
   name: String,
   image: String,
@@ -26,6 +36,8 @@ const courseSchema = new mongoose.Schema({
   description: String,
   resources: [resourceSchema],
   checkpoints: [checkpointSchema],
+  instructor: String,
+  badge: String,
 });
 
 const Course = mongoose.model('Course', courseSchema);

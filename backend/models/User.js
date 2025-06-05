@@ -46,7 +46,8 @@ const userSchema = new mongoose.Schema({
     course: { type: mongoose.Schema.Types.ObjectId, ref: 'Course' },
     completedCheckpoints: [{ type: mongoose.Schema.Types.ObjectId }]
   }],
-}, {
+}, 
+{
   timestamps: true
 });
 

@@ -10,7 +10,7 @@ import validator from 'validator';
 const router = express.Router();
 
 // Create a new category
-router.post('/createcategory',auth,admin, async (req, res) => {
+router.post('/createcategory', auth, admin, async (req, res) => {
   const { name, type } = req.body;
 
   try {
@@ -26,16 +26,22 @@ router.post('/createcategory',auth,admin, async (req, res) => {
 router.get('/', async (req, res) => {
   try {
     const categories = await Category.find()
-      .populate('universities')
-      .populate('courses');
+      .populate({
+        path: 'universities',
+        model: 'University',
+        
+      })
+      .populate('courses'); // for 'general' categories if needed
+
     res.json(categories);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error('Error fetching categories', err);
+    res.status(500).json({ error: 'Server error' });
   }
 });
 
 // Add a university to a category (only if type is 'university')
-router.post('/:categoryId/universities',auth,admin, async (req, res) => {
+router.post('/:categoryId/universities', auth, admin, async (req, res) => {
   const { name } = req.body;
   const { categoryId } = req.params;
 
@@ -59,7 +65,7 @@ router.post('/:categoryId/universities',auth,admin, async (req, res) => {
 
 // Add a course to a general category
 router.post('/:categoryId/courses', auth, async (req, res) => {
-  const { name, image, description } = req.body;
+  let { name, image, description } = req.body;
   const { categoryId } = req.params;
 
   // Validate required fields
@@ -80,9 +86,14 @@ router.post('/:categoryId/courses', auth, async (req, res) => {
     await course.save();
 
     const category = await Category.findById(categoryId);
+    if (!category) return res.status(404).json({ message: 'Category not found' });
+
     if (category.type !== 'general') {
       return res.status(400).json({ message: 'This category does not accept direct courses' });
     }
+
+    // Ensure courses is initialized
+    if (!category.courses) category.courses = [];
 
     category.courses.push(course._id);
     await category.save();

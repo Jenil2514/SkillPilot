@@ -11,7 +11,7 @@ const router = express.Router();
 
 // Register
 router.post('/register', async (req, res) => {
-  const { name, email, password } = req.body;
+  const { name, email, password  } = req.body;
   const trimmedName = name?.trim();
 
   if (!trimmedName || !email || !password) {
@@ -22,11 +22,10 @@ router.post('/register', async (req, res) => {
       message: 'Name must be between 2 and 50 characters',
     });
   }
-  if (!/^[a-zA-Z\s]+$/.test(trimmedName)) {
-    return res.status(400).json({
-      message: 'Name can only contain letters and spaces',
-    });
+  if (!/^[A-Za-z0-9\s]+$/.test(trimmedName)) {
+    return res.status(400).json({ message: "Name can only contain letters, numbers, and spaces" });
   }
+
   if (!validator.isEmail(email)) {
     return res.status(400).json({ message: 'Invalid email format' });
   }
@@ -93,7 +92,7 @@ router.get('/profile/:userId', async (req, res) => {
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
-    
+
     // Return public profile data
     res.json({
       id: user._id,
@@ -122,7 +121,7 @@ router.get('/profile', auth, async (req, res) => {
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
-    
+
     res.json({
       name: user.name,
       email: user.email,
@@ -146,18 +145,18 @@ router.get('/profile', auth, async (req, res) => {
 router.put('/profile', auth, async (req, res) => {
   try {
     const { name, bio, location, website } = req.body;
-    
+
     // Validate input
     if (name && !validator.isLength(name.trim(), { min: 2, max: 50 })) {
       return res.status(400).json({ message: 'Name must be between 2 and 50 characters' });
     }
-    
+
     const updateData = {};
     if (name) updateData.name = name.trim();
     if (bio !== undefined) updateData.bio = bio;
     if (location !== undefined) updateData.location = location;
     if (website !== undefined) updateData.website = website;
-    
+
     const user = await User.findByIdAndUpdate(req.user._id, updateData, { new: true }).select('-password');
     res.json({ message: 'Profile updated successfully', user });
   } catch (err) {
@@ -168,28 +167,28 @@ router.put('/profile', auth, async (req, res) => {
 // Forgot password - send OTP
 router.post('/forgot-password', async (req, res) => {
   const { email } = req.body;
-  
+
   if (!email || !validator.isEmail(email)) {
     return res.status(400).json({ message: 'Valid email is required' });
   }
-  
+
   try {
     const user = await User.findOne({ email });
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
-    
+
     // Generate OTP
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
     const otpExpires = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
-    
+
     user.resetPasswordOTP = otp;
     user.resetPasswordExpires = otpExpires;
     await user.save();
-    
+
     // In production, send email with OTP
     console.log(`OTP for ${email}: ${otp}`);
-    
+
     res.json({ message: 'OTP sent to your email' });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -199,38 +198,38 @@ router.post('/forgot-password', async (req, res) => {
 // Verify OTP and reset password
 router.post('/reset-password', async (req, res) => {
   const { email, otp, newPassword } = req.body;
-  
+
   if (!email || !otp || !newPassword) {
     return res.status(400).json({ message: 'All fields are required' });
   }
-  
+
   if (!validator.isEmail(email)) {
     return res.status(400).json({ message: 'Invalid email format' });
   }
-  
+
   if (!validator.isStrongPassword(newPassword)) {
     return res.status(400).json({
       message: 'Password must be at least 8 characters long and include uppercase, lowercase, number, and symbol',
     });
   }
-  
+
   try {
     const user = await User.findOne({
       email,
       resetPasswordOTP: otp,
       resetPasswordExpires: { $gt: Date.now() }
     });
-    
+
     if (!user) {
       return res.status(400).json({ message: 'Invalid or expired OTP' });
     }
-    
+
     const hashedPassword = await bcrypt.hash(newPassword, 10);
     user.password = hashedPassword;
     user.resetPasswordOTP = undefined;
     user.resetPasswordExpires = undefined;
     await user.save();
-    
+
     res.json({ message: 'Password reset successfully' });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -240,19 +239,19 @@ router.post('/reset-password', async (req, res) => {
 // Contact us
 router.post('/contact', async (req, res) => {
   const { name, email, subject, message } = req.body;
-  
+
   if (!name || !email || !subject || !message) {
     return res.status(400).json({ message: 'All fields are required' });
   }
-  
+
   if (!validator.isEmail(email)) {
     return res.status(400).json({ message: 'Invalid email format' });
   }
-  
+
   try {
     // In production, save to database or send email
     console.log('Contact form submission:', { name, email, subject, message });
-    
+
     res.json({ message: 'Your message has been sent successfully' });
   } catch (err) {
     res.status(500).json({ error: err.message });

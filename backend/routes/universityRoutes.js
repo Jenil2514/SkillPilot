@@ -56,13 +56,13 @@ router.post('/:universityId/semesters',auth,admin, async (req, res) => {
   }
 });
 
-// Add Course to Semester
+// Add Course to Semester admin
 router.post('/semester/:semesterId/courses',auth,admin, async (req, res) => {
   const { semesterId } = req.params;
-  const { name, image, description } = req.body;
+  const { name, image, description,resources } = req.body;
 
   try {
-    const course = new Course({ name, image, description });
+    const course = new Course({ name, image, description,resources });
     await course.save();
 
     const semester = await Semester.findById(semesterId);

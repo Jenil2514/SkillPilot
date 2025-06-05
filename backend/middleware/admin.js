@@ -1,6 +1,12 @@
+import User from "../models/User.js";
 const admin = async (req, res, next) => {
   try {
-    const user = req.user; // already decoded in auth middleware
+
+    const userId = req.user; // already decoded in auth middleware
+    if (!userId) {
+      return res.status(401).json({ message: 'Unauthorized' });
+    }
+    const user = await User.findById(userId).select('role'); // only select role for efficiency
 
     if (!user || user.role !== 'admin') {
       return res.status(403).json({ message: 'Access denied. Admins only.' });

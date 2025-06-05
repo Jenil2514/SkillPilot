@@ -30,7 +30,7 @@ router.get('/', async (req, res) => {
 
 // POST /api/courses/:courseId/resources - Add a new resource to a course
 router.post('/:courseId/resources', auth, async (req, res) => {
-  const { title, url, description, tags } = req.body;
+  let { title, url, description, tags } = req.body;
 
   // Validate required fields
   if (!title || !url) {
@@ -55,13 +55,75 @@ router.post('/:courseId/resources', auth, async (req, res) => {
       url,
       description,
       tags,
-      user: req.user // user ID from auth middleware
+      user: req.user._id // user ID from auth middleware
     };
 
     course.resources.push(newResource);
     await course.save();
 
     res.status(201).json({ message: 'Resource added successfully', resource: newResource });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Upvote a resource in a course
+router.post('/:courseId/resources/:resourceId/upvote', auth, async (req, res) => {
+  try {
+    const { courseId, resourceId } = req.params;
+    const userId = req.user._id;
+
+    const course = await Course.findById(courseId);
+    if (!course) return res.status(404).json({ message: 'Course not found' });
+
+    const resource = course.resources.id(resourceId);
+        // console.log("before",resource.upvotes);
+
+    if (!resource) return res.status(404).json({ message: 'Resource not found' });
+
+    // Check if user already upvoted
+    if (resource.upvotedBy && resource.upvotedBy.includes(userId)) {
+      return res.status(400).json({ message: 'You have already upvoted this resource.' });
+    }
+
+    resource.upvotes = (resource.upvotes || 0) + 1;
+    resource.upvotedBy = resource.upvotedBy || [];
+    resource.upvotedBy.push(userId);
+    await course.save();
+    // console.log("after add",resource.upvotes);
+
+    res.json({ message: 'Resource upvoted', upvotes: resource.upvotes });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Remove upvote from a resource in a course
+router.post('/:courseId/resources/:resourceId/remove-upvote', auth, async (req, res) => {
+  try {
+    const { courseId, resourceId } = req.params;
+    const userId = req.user._id;
+
+    const course = await Course.findById(courseId);
+    if (!course) return res.status(404).json({ message: 'Course not found' });
+
+    const resource = course.resources.id(resourceId);
+    if (!resource) return res.status(404).json({ message: 'Resource not found' });
+    // console.log("before",resource.upvotes);
+    // Check if user has upvoted
+    if (!resource.upvotedBy || !resource.upvotedBy.includes(userId)) {
+      return res.status(400).json({ message: 'You have not upvoted this resource.' });
+    }
+
+    // Remove user from upvotedBy and decrement upvotes
+    resource.upvotedBy = (resource.upvotedBy || []).filter(
+      id => id && id.toString() !== userId.toString()
+    );
+    resource.upvotes = Math.max((resource.upvotes || 1) - 1, 0);
+    await course.save();
+    // console.log("after remove",resource.upvotes);
+
+    res.json({ message: 'Upvote removed', upvotes: resource.upvotes });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

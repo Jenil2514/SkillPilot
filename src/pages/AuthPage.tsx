@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -8,11 +7,15 @@ import { Separator } from '@/components/ui/separator';
 import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import authService from '@/services/authService';
+import { useAuth } from '@/hooks/useAuth';
+
 
 const AuthPage = () => {
   const [isLogin, setIsLogin] = useState(true);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+    const { login } = useAuth();
+
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -33,7 +36,8 @@ const AuthPage = () => {
 
     try {
       if (isLogin) {
-        await authService.login({ email: formData.email, password: formData.password });
+        const { user } = await authService.login({ email: formData.email, password: formData.password });
+        login(user); // <-- This updates the context immediately
         toast.success('Login successful!');
         navigate('/');
       } else {
@@ -50,8 +54,13 @@ const AuthPage = () => {
         setIsLogin(true);
         setFormData({ name: '', email: '', password: '', confirmPassword: '' });
       }
-    } catch (error: any) {
-      toast.error(error.response?.data?.message || 'An error occurred');
+    } catch (error: unknown) {
+      if (error && typeof error === 'object' && 'response' in error && error.response && typeof error.response === 'object' && 'data' in error.response && error.response.data && typeof error.response.data === 'object' && 'message' in error.response.data) {
+        // @ts-expect-error: dynamic error shape from backend
+        toast.error(error.response.data.message);
+      } else {
+        toast.error('An error occurred');
+      }
     } finally {
       setLoading(false);
     }

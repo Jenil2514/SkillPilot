@@ -6,14 +6,11 @@ import { useState } from "react";
 interface CourseCardProps {
   title: string;
   instructor: string;
-  rating: number;
-  reviewCount: string;
-  price: string;
   image: string;
   badge?: string;
 }
 
-const CourseCard = ({ title, instructor, rating, reviewCount, price, image, badge }: CourseCardProps) => {
+const CourseCard = ({ title, instructor, image, badge }: CourseCardProps) => {
   const [isBookmarked, setIsBookmarked] = useState(false);
 
   const handleBookmark = (e: React.MouseEvent) => {
@@ -30,7 +27,8 @@ const CourseCard = ({ title, instructor, rating, reviewCount, price, image, badg
           <img 
             src={image} 
             alt={title}
-            className="w-full h-48 object-cover rounded-t-lg"
+            
+            className="w-full h-48 object-cover rounded-t-lg aspect-[4/3]"
           />
           {badge && (
             <span className="absolute top-2 left-2 bg-yellow-400 text-black text-xs font-bold px-2 py-1 rounded">
@@ -53,18 +51,7 @@ const CourseCard = ({ title, instructor, rating, reviewCount, price, image, badg
           </h3>
           <p className="text-sm text-gray-600 dark:text-gray-300 mb-2">{instructor}</p>
           
-          <div className="flex items-center mb-2">
-            <span className="font-bold text-orange-500 mr-1">{rating}</span>
-            <div className="flex">
-              {[...Array(5)].map((_, i) => (
-                <Star 
-                  key={i} 
-                  className={`h-3 w-3 ${i < Math.floor(rating) ? 'text-orange-500 fill-current' : 'text-gray-300'}`} 
-                />
-              ))}
-            </div>
-            <span className="text-sm text-gray-500 dark:text-gray-300 ml-2">({reviewCount})</span>
-          </div>
+          
           
         </div>
       </div>

@@ -1,4 +1,3 @@
-
 import { useState, useEffect, createContext, useContext, ReactNode } from 'react';
 import authService, { User } from '@/services/authService';
 
@@ -7,6 +6,7 @@ interface AuthContextType {
   isAuthenticated: boolean;
   loading: boolean;
   logout: () => void;
+  login: (user: User) => void; // Add this
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -26,11 +26,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setUser(null);
   };
 
+  const login = (user: User) => {
+    setUser(user);
+  };
+
   const value = {
     user,
     isAuthenticated: !!user,
     loading,
-    logout
+    logout,
+    login, // Add this
   };
 
   return (
