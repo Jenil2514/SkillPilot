@@ -5,6 +5,7 @@ import User from '../models/User.js';
 import auth from '../middleware/auth.js';
 import validator from 'validator';
 import crypto from 'crypto';
+import nodemailer from 'nodemailer';
 
 const router = express.Router();
 
@@ -213,8 +214,23 @@ router.post('/forgot-password', async (req, res) => {
     user.resetPasswordExpires = otpExpires;
     await user.save();
 
-    // In production, send email with OTP
-    console.log(`OTP for ${email}: ${otp}`);
+    // Send email with OTP
+    const transporter = nodemailer.createTransport({
+      service: 'gmail', // or your email provider
+      auth: {
+        user: process.env.EMAIL_USER, // your email
+        pass: process.env.EMAIL_PASS  // your email password or app password
+      }
+    });
+
+    const mailOptions = {
+      from: process.env.EMAIL_USER,
+      to: email,
+      subject: 'Your OTP for Password Reset',
+      text: `Your OTP for password reset is: ${otp}. It will expire in 10 minutes.`
+    };
+
+    await transporter.sendMail(mailOptions);
 
     res.json({ message: 'OTP sent to your email' });
   } catch (err) {
@@ -345,5 +361,47 @@ router.get('/saved', auth, async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
+
+// Get user's course progress
+router.get('/progress', auth, async (req, res) => {
+  try {
+    const user = await User.findById(req.user).populate('progress.course');
+    if (!user) return res.status(404).json({ message: 'User not found' });
+    res.json(user.progress || []);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Update progress for a course
+router.put('/progress/:courseId', auth, async (req, res) => {
+  const { courseId } = req.params;
+  const { completedCheckpoints } = req.body;
+
+  if (!Array.isArray(completedCheckpoints)) {
+    return res.status(400).json({ message: 'completedCheckpoints must be an array' });
+  }
+
+  try {
+    const user = await User.findById(req.user);
+    if (!user) return res.status(404).json({ message: 'User not found' });
+
+    const progressItem = user.progress.find(
+      (item) => item.course.toString() === courseId
+    );
+
+    if (progressItem) {
+      progressItem.completedCheckpoints = completedCheckpoints;
+    } else {
+      user.progress.push({ course: courseId, completedCheckpoints });
+    }
+
+    await user.save();
+    res.json({ message: 'Progress updated', progress: user.progress });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 
 export default router;

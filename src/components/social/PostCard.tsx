@@ -111,9 +111,9 @@ const PostCard = ({ post }: PostCardProps) => {
     }
   };
 
-  const handleShare = () => {
-    console.log('Share clicked for post:', post._id);
-  };
+  // const handleShare = () => {
+  //   console.log('Share clicked for post:', post._id);
+  // };
 
   const getUserInitials = (name: string) => {
     return name.split(' ').map(n => n[0]).join('').toUpperCase();
@@ -165,14 +165,14 @@ const PostCard = ({ post }: PostCardProps) => {
                 <span className="text-sm">{likeCount}</span>
               </Button>
 
-              <Button
+              {/* <Button
                 variant="ghost"
                 size="sm"
                 onClick={handleShare}
                 className="text-gray-500 hover:text-gray-700 hover:bg-gray-50"
               >
                 <Share className="w-4 h-4" />
-              </Button>
+              </Button> */}
             </div>
           </div>
         </div>

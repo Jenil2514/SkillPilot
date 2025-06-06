@@ -28,9 +28,20 @@ router.get('/', async (req, res) => {
   }
 });
 
+// Get a single course by ID
+router.get('/:courseId', async (req, res) => {
+  try {
+    const course = await Course.findById(req.params.courseId);
+    if (!course) return res.status(404).json({ message: 'Course not found' });
+    res.json(course);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // POST /api/courses/:courseId/resources - Add a new resource to a course
 router.post('/:courseId/resources', auth, async (req, res) => {
-  let { title, url, description, tags } = req.body;
+  let { title, url, description, tags, type } = req.body;
 
   // Validate required fields
   if (!title || !url) {
@@ -55,7 +66,8 @@ router.post('/:courseId/resources', auth, async (req, res) => {
       url,
       description,
       tags,
-      user: req.user // user ID from auth middleware
+      type: type || 'other', // default to 'other' if not provided
+      AddedBy: req.user // user ID from auth middleware
     };
 
     course.resources.push(newResource);
@@ -124,6 +136,82 @@ router.post('/:courseId/resources/:resourceId/remove-upvote', auth, async (req, 
     // console.log("after remove",resource.upvotes);
 
     res.json({ message: 'Upvote removed', upvotes: resource.upvotes });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Add a checkpoint to a course (admin only)
+router.post('/:courseId/checkpoints', auth, admin, async (req, res) => {
+  try {
+    const { courseId } = req.params;
+    const { title, resources } = req.body;
+
+    if (!title) {
+      return res.status(400).json({ message: 'Checkpoint title is required' });
+    }
+
+    const course = await Course.findById(courseId);
+    if (!course) return res.status(404).json({ message: 'Course not found' });
+
+    const newCheckpoint = {
+      title,
+      resources: Array.isArray(resources) ? resources : []
+    };
+
+    course.checkpoints.push(newCheckpoint);
+    await course.save();
+
+    res.status(201).json({ message: 'Checkpoint added successfully', checkpoint: newCheckpoint });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// POST /api/courses/:courseId/resources/:resourceId/comments - Add a comment to a resource
+router.post('/:courseId/resources/:resourceId/comments', auth, async (req, res) => {
+  try {
+    const { courseId, resourceId } = req.params;
+    const { text } = req.body;
+    const userId = req.user;
+
+    if (!text || !text.trim()) {
+      return res.status(400).json({ message: 'Comment text is required' });
+    }
+
+    const course = await Course.findById(courseId);
+    if (!course) return res.status(404).json({ message: 'Course not found' });
+
+    const resource = course.resources.id(resourceId);
+    if (!resource) return res.status(404).json({ message: 'Resource not found' });
+
+    const newComment = {
+      user: userId,
+      text: text.trim(),
+      createdAt: new Date()
+    };
+
+    resource.comments.push(newComment);
+    await course.save();
+
+    res.status(201).json({ message: 'Comment added', comment: newComment });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// GET /api/courses/:courseId/resources/:resourceId/comments - Get all comments for a resource
+router.get('/:courseId/resources/:resourceId/comments', async (req, res) => {
+  try {
+    const { courseId, resourceId } = req.params;
+
+    const course = await Course.findById(courseId);
+    if (!course) return res.status(404).json({ message: 'Course not found' });
+
+    const resource = course.resources.id(resourceId);
+    if (!resource) return res.status(404).json({ message: 'Resource not found' });
+
+    res.json({ comments: resource.comments });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

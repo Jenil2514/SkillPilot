@@ -11,6 +11,11 @@ export interface Resource {
   type: 'video' | 'article' | 'documentation' | 'other';
 }
 
+export interface checkpoints{
+  title: string;
+  resources: Resource[];
+}
+
 export interface Comment {
   _id: string;
   user: string;
@@ -25,6 +30,10 @@ export interface CourseData {
   views: number;
   description: string;
   resources: Resource[];
+  checkpoints: checkpoints[];
+  instructor: string,
+  badge: string,
+
 }
 
 export interface SemesterData {

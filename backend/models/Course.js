@@ -11,14 +11,22 @@ const commentSchema = new mongoose.Schema({
 const resourceSchema = new mongoose.Schema({
   title: String,
   url: String,
-  description: String,
+  description: String, 
   tags: [String],
-  user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }, // who added resource
-  upvotes: { type: Number, default: 0 },
-  upvotedBy: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }], // <-- Add this line
+  AddedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }, // who added resource
+  upvotedBy: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
   comments: [commentSchema],
   type: { type: String, enum: ['video', 'article', 'documentation', 'other'], default: 'other' },
 });
+
+// Virtual for upvotes count
+resourceSchema.virtual('upvotes').get(function () {
+  return this.upvotedBy.length;
+});
+
+// Ensure virtuals are included in JSON output
+resourceSchema.set('toJSON', { virtuals: true });
+resourceSchema.set('toObject', { virtuals: true });
 
 
 

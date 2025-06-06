@@ -56,10 +56,14 @@ const ContactUs = () => {
         subject: '',
         message: ''
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
+      let errorMessage = "Failed to send message";
+      if (error && typeof error === "object" && "response" in error && error.response && typeof error.response === "object" && "data" in error.response && error.response.data && typeof error.response.data === "object" && "message" in error.response.data) {
+        errorMessage = (error.response as { data: { message?: string } }).data.message || errorMessage;
+      }
       toast({
         title: "Error",
-        description: error.response?.data?.message || "Failed to send message",
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {

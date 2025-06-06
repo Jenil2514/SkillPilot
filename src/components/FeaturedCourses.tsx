@@ -16,62 +16,7 @@ const FeaturedCourses = () => {
         setCourses(Array.isArray(data) ? data.slice(0, 6) : []);
       } catch (error) {
         console.log('API call failed, using mock data:', error);
-        setCourses([
-          {
-            _id: '1',
-            name: 'Complete Web Development Bootcamp',
-            description: 'Learn HTML, CSS, JavaScript, React, Node.js and more',
-            image: '/placeholder.svg',
-            views: 15420,
-            checkpoints: [],
-            resources: []
-          },
-          {
-            _id: '2',
-            name: 'Data Science and Machine Learning Masterclass',
-            description: 'Become a data scientist and learn machine learning algorithms',
-            image: '/placeholder.svg',
-            views: 12870,
-            checkpoints: [],
-            resources: []
-          },
-          {
-            _id: '3',
-            name: 'The Ultimate Digital Marketing Course',
-            description: 'Master digital marketing, SEO, social media, and content marketing',
-            image: '/placeholder.svg',
-            views: 11230,
-            checkpoints: [],
-            resources: []
-          },
-          {
-            _id: '4',
-            name: 'Learn Ethical Hacking From Scratch',
-            description: 'Start from zero and become an ethical hacker',
-            image: '/placeholder.svg',
-            views: 9870,
-            checkpoints: [],
-            resources: []
-          },
-          {
-            _id: '5',
-            name: 'The Complete Financial Analyst Course',
-            description: 'Become a financial analyst and master financial modeling',
-            image: '/placeholder.svg',
-            views: 8540,
-            checkpoints: [],
-            resources: []
-          },
-          {
-            _id: '6',
-            name: 'The Complete iOS App Development Bootcamp',
-            description: 'Learn iOS app development with Swift',
-            image: '/placeholder.svg',
-            views: 7210,
-            checkpoints: [],
-            resources: []
-          }
-        ]);
+        
       } finally {
         setLoading(false);
       }
