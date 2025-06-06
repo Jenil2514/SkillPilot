@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import Header from '@/components/Header';
@@ -39,7 +38,8 @@ const UserProfile = () => {
       }
 
       try {
-        const response = await api.get(`/users/profile/${userId}`);
+        const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+        const response = await api.get(`${apiUrl}/api/users/profile/${userId}`);
         setUserProfile(response.data);
       } catch (error: any) {
         console.log('Failed to fetch user profile:', error);
@@ -97,7 +97,10 @@ const UserProfile = () => {
                 <CardContent className="pt-6">
                   <div className="text-center">
                     <Avatar className="w-24 h-24 mx-auto">
-                      <AvatarImage src="/placeholder.svg" alt={userProfile.name} />
+                      {/* Only show AvatarImage if userProfile.image exists */}
+                      {/* {userProfile.image && (
+                        <AvatarImage src={userProfile.image} alt={userProfile.name} />
+                      )} */}
                       <AvatarFallback className="text-2xl">
                         {getUserInitials(userProfile.name)}
                       </AvatarFallback>

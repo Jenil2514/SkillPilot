@@ -50,11 +50,11 @@ const CourseViewer = ({ university, selectedSemester, selectedCourse }: CourseVi
   // console.log(allResources);
 
   // Example: Store in state if needed
-  const [flattenedResources, setFlattenedResources] = useState<typeof allResources>([]);
+  // const [flattenedResources, setFlattenedResources] = useState<typeof allResources>([]);
 
-  useEffect(() => {
-    setFlattenedResources(allResources);
-  }, [courseData]);
+  // useEffect(() => {
+  //   setFlattenedResources(allResources);
+  // }, [courseData]);
 
 
   // Add source form state
@@ -129,13 +129,23 @@ const CourseViewer = ({ university, selectedSemester, selectedCourse }: CourseVi
       try {
         const sourceData = {
           title: newSource.title,
-          url: newSource.url,
+          url: `https://{newSource.url}`,
           description: newSource.description,
           tags: newSource.tags.split(',').map(tag => tag.trim()).filter(tag => tag),
-          type: newSource.url.includes('youtube') ? 'youtube' : 'other'
+          type: newSource.url.includes('youtube') ? 'video' : 'other'
         };
         const courseid = selectedCourse// Assuming you want to add to the first course of the first semester
-        const response = await axios.post(`/api/courses/${courseid}/resource`, sourceData);
+        const apiUrl = import.meta.env.VITE_BACKEND_URI || 'http://localhost:5000';
+        console.log("full apiUrl", `${apiUrl}/api/courses/${courseid}/resources`);
+        const response = await axios.post(
+          `${apiUrl}/api/courses/${courseid}/resources`,
+          sourceData,
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem('token')}`
+            }
+          }
+        );
 
         setResources(prev => [response.data, ...prev]);
         setNewSource({ title: '', url: '', description: '', tags: '' });
@@ -183,7 +193,9 @@ const CourseViewer = ({ university, selectedSemester, selectedCourse }: CourseVi
   const selectedCourseData = courseData.find(course => course._id === selectedCourse);
 
   // Use the resources of the selected course, or an empty array if not found
-  const selectedCourseResources = selectedCourseData ? selectedCourseData.resources : [];
+  const selectedCourseResources = selectedCourseData
+    ? [...selectedCourseData.resources].sort((a, b) => (b.upvotes || 0) - (a.upvotes || 0))
+    : [];
 
   return (
     <Card>
@@ -272,92 +284,95 @@ const CourseViewer = ({ university, selectedSemester, selectedCourse }: CourseVi
           <h3 className="font-semibold text-lg">
             Learning Sources ({selectedCourseResources.length})
           </h3>
-          {selectedCourseResources.map((source) => (
-            <Card key={source._id} className="border-gray-200">
-              <CardContent className="p-4">
-                <div className="flex items-start justify-between mb-3">
-                  <div className="flex items-start space-x-3 flex-1">
-                    {getSourceIcon(source.type)}
-                    <div className="flex-1">
-                      <h4 className="font-medium text-lg">{source.title}</h4>
-                      <p className="text-gray-600 text-sm mt-1">{source.description}</p>
-                      <a
-                        href={source.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-blue-600 hover:underline text-sm flex items-center mt-2"
+          {/* Scrollable resource list */}
+          <div style={{ maxHeight: 400, overflowY: 'auto' }}>
+            {selectedCourseResources.map((source) => (
+              <Card key={source._id} className="border-gray-200 mb-2">
+                <CardContent className="p-4">
+                  <div className="flex items-start justify-between mb-3">
+                    <div className="flex items-start space-x-3 flex-1">
+                      {getSourceIcon(source.type)}
+                      <div className="flex-1">
+                        <h4 className="font-medium text-lg">{source.title}</h4>
+                        <p className="text-gray-600 text-sm mt-1">{source.description}</p>
+                        <a
+                          href={source.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-blue-600 hover:underline text-sm flex items-center mt-2"
+                        >
+                          Visit Source <ExternalLink className="h-3 w-3 ml-1" />
+                        </a>
+                        <div className="flex flex-wrap gap-1 mt-2">
+                          {Array.isArray(source.tags) && source.tags.map((tag) => (
+                            <span
+                              key={tag}
+                              className="bg-gray-100 text-gray-700 px-2 py-1 rounded-full text-xs"
+                            >
+                              #{tag}
+                            </span>
+                          ))}
+                        </div>
+                        <p className="text-xs text-gray-500 mt-2">Added by {source.addedBy}</p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center space-x-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleUpvote(source._id)}
+                        className={upvotedSources.includes(source._id) ? 'bg-blue-50 border-blue-300 dark:text-black hover:dark:text-white': ''}
                       >
-                        Visit Source <ExternalLink className="h-3 w-3 ml-1" />
-                      </a>
-                      <div className="flex flex-wrap gap-1 mt-2">
-                        {Array.isArray(source.tags) && source.tags.map((tag) => (
-                          <span
-                            key={tag}
-                            className="bg-gray-100 text-gray-700 px-2 py-1 rounded-full text-xs"
-                          >
-                            #{tag}
-                          </span>
+                        <ThumbsUp className={`h-4 w-4 mr-1 ${upvotedSources.includes(source._id) ? 'fill-blue-500 text-blue-500' : ''}`} />
+                        {source.upvotes}
+                      </Button>
+
+                      {/* <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setShowComments(showComments === source._id ? null : source._id)}
+                      >
+                        <MessageCircle className="h-4 w-4 mr-1" />
+                        {Array.isArray(source.comments) ? source.comments.length : 0}
+                      </Button> */}
+                    </div>
+                  </div>
+
+                  {/* Comments Section */}
+                  {/* {showComments === source._id && (
+                    <div className="mt-4 border-t pt-4">
+                      <h5 className="font-medium mb-3">Comments</h5> */}
+
+                  {/* Add Comment */}
+                  {/* <div className="mb-4">
+                        <Textarea
+                          placeholder="Add a comment..."
+                          value={newComment}
+                          onChange={(e) => setNewComment(e.target.value)}
+                          className="mb-2"
+                        />
+                        
+                      </div> */}
+
+                  {/* Existing Comments */}
+                  {/* <div className="space-y-3">
+                        {Array.isArray(source.comments) && source.comments.map((comment) => (
+                          <div key={comment._id} className="bg-gray-50 p-3 rounded">
+                            <div className="flex justify-between items-start mb-2">
+                              <span className="font-medium text-sm">{comment.user}</span>
+                              <span className="text-xs text-gray-500">{comment.timestamp}</span>
+                            </div>
+                            <p className="text-sm">{comment.content}</p>
+                          </div>
                         ))}
                       </div>
-                      <p className="text-xs text-gray-500 mt-2">Added by {source.addedBy}</p>
                     </div>
-                  </div>
-
-                  <div className="flex items-center space-x-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleUpvote(source._id)}
-                      className={upvotedSources.includes(source._id) ? 'bg-blue-50 border-blue-300 dark:text-black hover:dark:text-white': ''}
-                    >
-                      <ThumbsUp className={`h-4 w-4 mr-1 ${upvotedSources.includes(source._id) ? 'fill-blue-500 text-blue-500' : ''}`} />
-                      {source.upvotes}
-                    </Button>
-
-                    {/* <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setShowComments(showComments === source._id ? null : source._id)}
-                    >
-                      <MessageCircle className="h-4 w-4 mr-1" />
-                      {Array.isArray(source.comments) ? source.comments.length : 0}
-                    </Button> */}
-                  </div>
-                </div>
-
-                {/* Comments Section */}
-                {/* {showComments === source._id && (
-                  <div className="mt-4 border-t pt-4">
-                    <h5 className="font-medium mb-3">Comments</h5> */}
-
-                {/* Add Comment */}
-                {/* <div className="mb-4">
-                      <Textarea
-                        placeholder="Add a comment..."
-                        value={newComment}
-                        onChange={(e) => setNewComment(e.target.value)}
-                        className="mb-2"
-                      />
-                      
-                    </div> */}
-
-                {/* Existing Comments */}
-                {/* <div className="space-y-3">
-                      {Array.isArray(source.comments) && source.comments.map((comment) => (
-                        <div key={comment._id} className="bg-gray-50 p-3 rounded">
-                          <div className="flex justify-between items-start mb-2">
-                            <span className="font-medium text-sm">{comment.user}</span>
-                            <span className="text-xs text-gray-500">{comment.timestamp}</span>
-                          </div>
-                          <p className="text-sm">{comment.content}</p>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )} */}
-              </CardContent>
-            </Card>
-          ))}
+                  )} */}
+                </CardContent>
+              </Card>
+            ))}
+          </div>
         </div>
       </CardContent>
     </Card>

@@ -5,72 +5,28 @@ import Footer from '@/components/Footer';
 import CourseCard from '@/components/CourseCard';
 import { Button } from '@/components/ui/button';
 import courseService from '@/services/courseService';
-
-interface Course {
-  id: string;
-  title: string;
-  instructor: string;
-  rating: number;
-  reviewCount: string;
-  price: string;
-  image: string;
-  badge?: string;
-}
+import { CourseData, } from '@/components/types/type';
+import { useNavigate } from 'react-router-dom';
 
 const SavedCourses = () => {
-  const [savedCourses, setSavedCourses] = useState<Course[]>([]);
+  const [savedCourses, setSavedCourses] = useState<CourseData[]>([]);
   const [loading, setLoading] = useState(true);
-
+  const navigate = useNavigate();
   useEffect(() => {
     const fetchSavedCourses = async () => {
       try {
         const courses = await courseService.getSavedCourses();
-        // Transform the API response to match our Course interface
-        const transformedCourses = courses.map(course => ({
-          id: course._id,
-          title: course.name,
-          instructor: "Various Instructors", // Since the backend doesn't have instructor field
-          rating: 4.5 + Math.random() * 0.5, // Mock rating
-          reviewCount: (Math.floor(Math.random() * 100000) + 10000).toLocaleString(),
-          price: "$" + (Math.floor(Math.random() * 50) + 50) + ".99",
-          image: course.image || "/placeholder.svg",
-          badge: Math.random() > 0.7 ? "Bestseller" : undefined
+        // Transform the API response to match our CourseData interface
+        const mappedCourses: CourseData[] = courses.map((course: CourseData) => ({
+          ...course,
+          instructor: course.instructor ?? '', // Provide default if missing
+          badge: course.badge ?? '', // Provide default if missing
         }));
-        setSavedCourses(transformedCourses);
+        setSavedCourses(mappedCourses);
       } catch (error) {
         console.log('API call failed, using mock data:', error);
         // Mock data as fallback
-        setSavedCourses([
-          {
-            id: "1",
-            title: "Complete Web Development Bootcamp",
-            instructor: "Dr. Angela Yu",
-            rating: 4.7,
-            reviewCount: "268,789",
-            price: "$84.99",
-            image: "/placeholder.svg",
-            badge: "Bestseller"
-          },
-          {
-            id: "2",
-            title: "React - The Complete Guide",
-            instructor: "Maximilian Schwarzmüller",
-            rating: 4.6,
-            reviewCount: "195,123",
-            price: "$79.99",
-            image: "/placeholder.svg"
-          },
-          {
-            id: "3",
-            title: "JavaScript: The Advanced Concepts",
-            instructor: "Andrei Neagoie",
-            rating: 4.8,
-            reviewCount: "89,456",
-            price: "$89.99",
-            image: "/placeholder.svg",
-            badge: "Hot & New"
-          }
-        ]);
+        ;
       } finally {
         setLoading(false);
       }
@@ -105,14 +61,12 @@ const SavedCourses = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {savedCourses.map((course) => (
               <CourseCard
-                key={course.id}
-                title={course.title}
-                instructor={course.instructor}
-                rating={course.rating}
-                reviewCount={course.reviewCount}
-                price={course.price}
+                courseId={course._id}
+                title={course.name}
+                view={course.views}
                 image={course.image}
                 badge={course.badge}
+                initiallyBookmarked={true}
               />
             ))}
           </div>
@@ -128,7 +82,8 @@ const SavedCourses = () => {
               <p className="text-muted-foreground mb-6">
                 Start exploring courses and save the ones you're interested in for later.
               </p>
-              <Button className="bg-purple-600 hover:bg-purple-700">
+              <Button className="bg-purple-600 hover:bg-purple-700" onClick={() => navigate('/search')}>
+
                 Browse Courses
               </Button>
             </div>

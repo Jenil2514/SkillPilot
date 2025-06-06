@@ -168,6 +168,22 @@ router.post('/:courseId/checkpoints', auth, admin, async (req, res) => {
   }
 });
 
+// PATCH /api/courses/:courseId/views - Increment course views
+router.patch('/:courseId/views', async (req, res) => {
+  try {
+    const { courseId } = req.params;
+    const course = await Course.findByIdAndUpdate(
+      courseId,
+      { $inc: { views: 1 } },
+      { new: true }
+    );
+    if (!course) return res.status(404).json({ message: 'Course not found' });
+    res.json({ message: 'Course views updated', views: course.views });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // POST /api/courses/:courseId/resources/:resourceId/comments - Add a comment to a resource
 router.post('/:courseId/resources/:resourceId/comments', auth, async (req, res) => {
   try {

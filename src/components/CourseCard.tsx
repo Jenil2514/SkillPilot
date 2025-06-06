@@ -1,33 +1,68 @@
-
 import { Star, Bookmark } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useState } from "react";
+import { Users } from "lucide-react";
+import axios from "axios";
 
 interface CourseCardProps {
+  courseId: string; // <-- Add this prop
   title: string;
-  instructor: string;
+  view: number;
   image: string;
   badge?: string;
+  initiallyBookmarked?: boolean; // Optional: for SSR or initial state
 }
 
-const CourseCard = ({ title, instructor, image, badge }: CourseCardProps) => {
-  const [isBookmarked, setIsBookmarked] = useState(false);
+const CourseCard = ({
+  courseId,
+  title,
+  view,
+  image,
+  badge,
+  initiallyBookmarked = false,
+}: CourseCardProps) => {
+  const [isBookmarked, setIsBookmarked] = useState(initiallyBookmarked);
+  const [loading, setLoading] = useState(false);
 
-  const handleBookmark = (e: React.MouseEvent) => {
+  const handleBookmark = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    setIsBookmarked(!isBookmarked);
-    console.log(`Course ${isBookmarked ? 'removed from' : 'added to'} bookmarks: ${title}`);
+    setLoading(true);
+
+    const token = localStorage.getItem("token");
+    const apiUrl = import.meta.env.VITE_BACKEND_URI;
+    const url = isBookmarked
+      ? `${apiUrl}/api/users/unsave/${courseId}`
+      : `${apiUrl}/api/users/save/${courseId}`;
+    const method = isBookmarked ? "delete" : "post";
+    // console.log("full URL:", url);
+    try {
+      await axios({
+        url,
+        method,
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      setIsBookmarked(!isBookmarked);
+    } catch (err: any) {
+      alert(
+        err.response?.data?.message ||
+          "Failed to update bookmark"
+      );
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <Link to="/course/1" className="block">
+    <Link to={`/course/${courseId}`} className="block">
       <div className="bg-background rounded-lg shadow-sm hover:shadow-lg transition-shadow cursor-pointer group">
         <div className="relative">
-          <img 
-            src={image} 
+          <img
+            src={image}
             alt={title}
-            
             className="w-full h-48 object-cover rounded-t-lg aspect-[4/3]"
           />
           {badge && (
@@ -38,21 +73,28 @@ const CourseCard = ({ title, instructor, image, badge }: CourseCardProps) => {
           <button
             onClick={handleBookmark}
             className="absolute top-2 right-2 p-2 rounded-full bg-white/80 hover:bg-white transition-colors"
+            disabled={loading}
           >
-            <Bookmark 
-              className={`h-4 w-4 ${isBookmarked ? 'fill-purple-600 text-purple-600' : 'text-gray-600'}`} 
+            <Bookmark
+              className={`h-4 w-4 ${
+                isBookmarked ? "fill-purple-600 text-purple-600" : "text-gray-600"
+              }`}
             />
           </button>
         </div>
-        
-        <div className="p-4">
-          <h3 className="font-bold text-gray-900 dark:text-gray-300 mb-2 line-clamp-2 group-hover:text-purple-600 transition-colors">
-            {title}
-          </h3>
-          <p className="text-sm text-gray-600 dark:text-gray-300 mb-2">{instructor}</p>
-          
-          
-          
+
+        <div className="p-4 flex justify-between items-center">
+          <div className="flex-1">
+            <h3 className="font-bold text-gray-900 dark:text-gray-300 line-clamp-2 group-hover:text-purple-600 transition-colors">
+              {title}
+            </h3>
+          </div>
+          <div className="flex items-center ml-4">
+            <Users className="h-4 w-4 mr-1" />
+            <p className="text-sm text-gray-600 dark:text-gray-300">
+              {view > 1000 ? "1K+" : view}
+            </p>
+          </div>
         </div>
       </div>
     </Link>

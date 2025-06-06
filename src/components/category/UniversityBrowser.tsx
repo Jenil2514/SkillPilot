@@ -112,40 +112,46 @@ const UniversityBrowser = ({ universities, selectedUniversity, onUniversitySelec
 
               <h3 className="font-bold text-lg mb-4">{selectedUniversityData?.name}</h3>
 
-              <div className="space-y-2">
-                {selectedUniversityData?.semesters.map((semester) => (
-                  <Collapsible
-                    key={semester._id}
-                    open={openSemesters.includes(semester._id)}
-                    onOpenChange={() => toggleSemester(semester._id)}
-                  >
-                    <CollapsibleTrigger className="w-full">
-                      <div className="flex items-center justify-between p-3 rounded-lg hover:bg-purple-50 hover:text-purple-600">
-                        <span className="font-medium">Semester {semester.number}</span>
-                        <ChevronDown
-                          className={`h-4 w-4 transition-transform ${openSemesters.includes(semester._id) ? 'rotate-180' : ''}`}
-                        />
-                      </div>
-                    </CollapsibleTrigger>
-                    <CollapsibleContent className="pl-4">
-                      <div className="space-y-1 mt-2">
-                        {semester.courses.map((course) => (
-                          <button
-                            key={course._id}
-                            onClick={() => {
-                              setSelectedSemester(String(semester.number));
-                              setSelectedCourse(course._id);
-                              onSemesterCourseSelect(String(semester.number), course._id);
-                            }}
-                            className="w-full text-left p-2 rounded hover:bg-blue-50 text-sm hover:bg-white hover:text-purple-600"
-                          >
-                            {course.name}
-                          </button>
-                        ))}
-                      </div>
-                    </CollapsibleContent>
-                  </Collapsible>
-                ))}
+              {/* Make this section scrollable with a height limit */}
+              <div style={{ maxHeight: 400, overflowY: 'auto' }}>
+                <div className="space-y-2">
+                  {selectedUniversityData?.semesters.map((semester) => (
+                    <Collapsible
+                      key={semester._id}
+                      open={openSemesters.includes(semester._id)}
+                      onOpenChange={() => toggleSemester(semester._id)}
+                    >
+                      <CollapsibleTrigger className="w-full">
+                        <div className="flex items-center justify-between p-3 rounded-lg hover:bg-purple-50 hover:text-purple-600">
+                          <span className="font-medium">Semester {semester.number}</span>
+                          <ChevronDown
+                            className={`h-4 w-4 transition-transform ${openSemesters.includes(semester._id) ? 'rotate-180' : ''}`}
+                          />
+                        </div>
+                      </CollapsibleTrigger>
+                      <CollapsibleContent className="pl-4">
+                        <div
+                          className="space-y-1 mt-2"
+                          style={{ maxHeight: 200, overflowY: 'auto' }} // Set your preferred height here
+                        >
+                          {semester.courses.map((course) => (
+                            <button
+                              key={course._id}
+                              onClick={() => {
+                                setSelectedSemester(String(semester.number));
+                                setSelectedCourse(course._id);
+                                onSemesterCourseSelect(String(semester.number), course._id);
+                              }}
+                              className="w-full text-left p-2 rounded hover:bg-blue-50 text-sm hover:bg-white hover:text-purple-600"
+                            >
+                              {course.name}
+                            </button>
+                          ))}
+                        </div>
+                      </CollapsibleContent>
+                    </Collapsible>
+                  ))}
+                </div>
               </div>
             </div>
 
