@@ -46,7 +46,7 @@ app.use(express.urlencoded({ limit: '5mb', extended: true }));
 // Rate limiter
 app.use(rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 100,
+  max: 500,
 }));
 
 // DB connection

@@ -2,7 +2,7 @@
 const Footer = () => {
   const skillSections = [
     {
-      title: "Explore top skills and certifications",
+      title: "Explore top skills",
       categories: [
         {
           title: "In-demand Careers",
@@ -48,7 +48,7 @@ const Footer = () => {
   return (
     <footer className="bg-black text-white py-16">
       <div className="container mx-auto px-4">
-        {skillSections.map((section, sectionIndex) => (
+        {/* {skillSections.map((section, sectionIndex) => (
           <div key={sectionIndex} className="mb-16">
             {section.title && (
               <h3 className="text-xl font-bold mb-8">{section.title}</h3>
@@ -71,7 +71,7 @@ const Footer = () => {
               ))}
             </div>
           </div>
-        ))}
+        ))} */}
         
         <div className="border-t border-gray-800 pt-8 text-center text-gray-400">
           <p>&copy; 2024 EduLearn, Inc. All rights reserved.</p>

@@ -403,5 +403,16 @@ router.put('/progress/:courseId', auth, async (req, res) => {
   }
 });
 
+// Get only the user's name by userId (public)
+router.get('/name/:userId', async (req, res) => {
+  try {
+    const user = await User.findById(req.params.userId).select('name');
+    if (!user) return res.status(404).json({ message: 'User not found' });
+    res.json({ name: user.name });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 
 export default router;

@@ -40,8 +40,8 @@ const PostComposer = () => {
       <CardContent className="p-4">
         <div className="flex space-x-3">
           <Avatar>
-            <AvatarImage src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=40&h=40&fit=crop&crop=face" />
-            <AvatarFallback>JD</AvatarFallback>
+            <AvatarImage src="https://png.pngtree.com/png-vector/20241101/ourlarge/pngtree-thinking-emoji-with-pensive-expression-representing-deep-png-image_14213837.png" />
+            <AvatarFallback>{}</AvatarFallback>
           </Avatar>
           <div className="flex-1">
             <Textarea

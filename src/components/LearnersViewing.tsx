@@ -1,19 +1,27 @@
 import React, { useEffect, useRef, useState } from "react";
 import axios from "axios";
 import CourseCard from "./CourseCard";
-import { ChevronLeft, ChevronRight, Users } from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { CourseData } from "./types/type";
+import { useAuth } from "../hooks/useAuth"; // If you have an auth hook for token
 
 const LearnersViewing = () => {
   const [courses, setCourses] = useState<CourseData[]>([]);
   const [loading, setLoading] = useState(true);
+  const [savedCourses, setSavedCourses] = useState<string[]>([]);
   const scrollRef = useRef<HTMLDivElement>(null);
+
+  // Get token once at the top
+  const token = localStorage.getItem("token");
 
   useEffect(() => {
     const fetchCourses = async () => {
       try {
-        const res = await axios.get("http://localhost:5000/api/courses"); // Update the URL if needed
-        // Sort courses by views descending (most viewed first)
+        if (!token) {
+          console.error("No authentication token found");
+          return;
+        }
+        const res = await axios.get("http://localhost:5000/api/courses");
         const sortedCourses = res.data.sort((a, b) => (b.views || 0) - (a.views || 0));
         setCourses(sortedCourses);
       } catch (error) {
@@ -22,8 +30,53 @@ const LearnersViewing = () => {
         setLoading(false);
       }
     };
+
+    const fetchSavedCourses = async () => {
+      if (!token) {
+        console.error("No authentication token found");
+        return;
+      }
+      try {
+        const res = await axios.get("http://localhost:5000/api/users/saved", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setSavedCourses(res.data.map((course: CourseData) => course._id));
+      } catch (error) {
+        setSavedCourses([]);
+      }
+    };
+
     fetchCourses();
-  }, []);
+    if (token) fetchSavedCourses();
+  }, [token]);
+
+  // Save/Unsave handlers
+  const handleSave = async (courseId: string) => {
+    if (!token) return;
+    try {
+      await axios.post(
+        `http://localhost:5000/api/users/save/${courseId}`,
+        {},
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      setSavedCourses((prev) => [...prev, courseId]);
+    } catch (error) {
+      // handle error
+    }
+  };
+
+  const handleUnsave = async (courseId: string) => {
+    if (!token) return;
+    try {
+      await axios.delete(
+        `http://localhost:5000/api/users/unsave/${courseId}`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      setSavedCourses((prev) => prev.filter((id) => id !== courseId));
+    } catch (error) {
+      // handle error
+    }
+  };
 
   const scroll = (direction: "left" | "right") => {
     if (scrollRef.current) {
@@ -71,7 +124,14 @@ const LearnersViewing = () => {
                   className="min-w-[300px] max-w-xs flex-shrink-0"
                   style={{ pointerEvents: "auto" }} // Allow interaction with cards
                 >
-                  <CourseCard {...course} courseId={course._id} title={course.name} view={course.views}/>
+                  <CourseCard
+                    {...course}
+                    courseId={course._id}
+                    title={course.name}
+                    view={course.views}
+                    initiallyBookmarked={savedCourses.includes(course._id)}
+                    
+                  />
                 </div>
               ))
             )}

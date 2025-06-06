@@ -1,16 +1,17 @@
 import { Star, Bookmark } from "lucide-react";
 import { Link } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Users } from "lucide-react";
 import axios from "axios";
 
 interface CourseCardProps {
-  courseId: string; // <-- Add this prop
+  courseId: string;
   title: string;
   view: number;
   image: string;
   badge?: string;
-  initiallyBookmarked?: boolean; // Optional: for SSR or initial state
+  initiallyBookmarked?: boolean;
+  onBookmarkToggle?: (courseId: string, currentlyBookmarked: boolean) => void; // Add this
 }
 
 const CourseCard = ({
@@ -20,9 +21,15 @@ const CourseCard = ({
   image,
   badge,
   initiallyBookmarked = false,
+  onBookmarkToggle,
 }: CourseCardProps) => {
   const [isBookmarked, setIsBookmarked] = useState(initiallyBookmarked);
   const [loading, setLoading] = useState(false);
+
+  // Sync with parent prop if it changes
+  useEffect(() => {
+    setIsBookmarked(initiallyBookmarked);
+  }, [initiallyBookmarked]);
 
   const handleBookmark = async (e: React.MouseEvent) => {
     e.preventDefault();
@@ -46,6 +53,9 @@ const CourseCard = ({
         },
       });
       setIsBookmarked(!isBookmarked);
+      if (onBookmarkToggle) {
+        await onBookmarkToggle(courseId, isBookmarked);
+      }
     } catch (err: any) {
       alert(
         err.response?.data?.message ||

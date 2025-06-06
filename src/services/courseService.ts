@@ -1,4 +1,4 @@
-
+import { Resource,checkpoints } from '@/components/types/type';
 import api from './api';
 
 export interface Course {
@@ -7,8 +7,9 @@ export interface Course {
   description: string;
   image: string;
   views: number;
-  checkpoints: any[];
-  resources: any[];
+  checkpoints: checkpoints[];
+  resources: Resource[];
+  badge: string;
 }
 
 class CourseService {

@@ -7,7 +7,7 @@ export interface Resource {
   tags: string[];
   upvotes: number;
   comments: Comment[];
-  addedBy: string;
+  AddedBy: string;
   type: 'video' | 'article' | 'documentation' | 'other';
 }
 

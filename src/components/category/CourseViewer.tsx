@@ -9,6 +9,7 @@ import { Resource, Comment, CourseData, SemesterData, } from '@/components/types
 import { CourseViewerProps } from '@/components/types/type';
 import { University } from '@/components/types/type';
 import { toast } from '@/hooks/use-toast';
+import { Link } from 'react-router-dom';
 
 // import { CourseData } from '@/components/types/type';
 
@@ -19,7 +20,7 @@ const CourseViewer = ({ university, selectedSemester, selectedCourse }: CourseVi
   const [universityData, setUniversityData] = useState<University | null>(null);
   const [courseData, setcourseData] = useState<CourseData[]>([]);
   const [semesterData, setsemesterData] = useState<SemesterData[]>([]);
-
+  const [userNames, setUserNames] = useState<{ [userId: string]: string }>({});
 
   useEffect(() => {
     setUniversityData(university);
@@ -29,9 +30,9 @@ const CourseViewer = ({ university, selectedSemester, selectedCourse }: CourseVi
   }, [university]);
 
   // Optional: If you want to log courseData when it changes, use this effect
-  useEffect(() => {
-    // console.log("courseData", courseData);
-  }, [courseData]);
+  // useEffect(() => {
+  //   // console.log("courseData", courseData);
+  // }, [courseData]);
   // console.log('University Data:', universityData);
   // console.log('Selected Semester:', selectedSemester);
   // console.log('Selected Course:', selectedCourse);
@@ -147,7 +148,13 @@ const CourseViewer = ({ university, selectedSemester, selectedCourse }: CourseVi
           }
         );
 
-        setResources(prev => [response.data, ...prev]);
+        setResources(prev => [
+          {
+            ...response.data,
+            AddedBy: response.data.AddedBy || localStorage.getItem('username') || 'Anonymous'
+          },
+          ...prev
+        ]);
         setNewSource({ title: '', url: '', description: '', tags: '' });
         setShowAddSource(false);
       } catch (error) {
@@ -161,7 +168,7 @@ const CourseViewer = ({ university, selectedSemester, selectedCourse }: CourseVi
           tags: newSource.tags.split(',').map(tag => tag.trim()).filter(tag => tag),
           upvotes: 0,
           comments: [],
-          addedBy: 'current_user',
+          AddedBy: localStorage.getItem('username') || 'Anonymous',
           type: newSource.url.includes('youtube') ? 'video' : 'other'
         };
 
@@ -196,6 +203,25 @@ const CourseViewer = ({ university, selectedSemester, selectedCourse }: CourseVi
   const selectedCourseResources = selectedCourseData
     ? [...selectedCourseData.resources].sort((a, b) => (b.upvotes || 0) - (a.upvotes || 0))
     : [];
+
+  // Fetch user name by user ID
+  const fetchUserName = async (userId: string) => {
+    if (!userId || userNames[userId]) return;
+    try {
+      const apiUrl = import.meta.env.VITE_BACKEND_URI || 'http://localhost:5000';
+      const res = await axios.get(`${apiUrl}/api/users/name/${userId}`);
+      setUserNames(prev => ({ ...prev, [userId]: res.data.name }));
+    } catch {
+      setUserNames(prev => ({ ...prev, [userId]: 'Anonymous' }));
+    }
+  };
+
+  useEffect(() => {
+    selectedCourseResources.forEach(source => {
+      if (source.AddedBy) fetchUserName(source.AddedBy);
+    });
+  }, [selectedCourseResources]);
+
 
   return (
     <Card>
@@ -313,7 +339,11 @@ const CourseViewer = ({ university, selectedSemester, selectedCourse }: CourseVi
                             </span>
                           ))}
                         </div>
-                        <p className="text-xs text-gray-500 mt-2">Added by {source.addedBy}</p>
+                        <p className="text-xs text-gray-500 mt-2 hover:underline cursor-pointer" >
+                          <Link to={`/user/${source.AddedBy}`}>
+                            Added by {userNames[source.AddedBy] || 'Anonymous'}
+                          </Link>
+                        </p>
                       </div>
                     </div>
 
