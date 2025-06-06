@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
@@ -9,8 +8,8 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Camera, Edit, Save, X } from 'lucide-react';
-import api from '@/services/api';
+import {  Edit, Save, X } from 'lucide-react';
+import axios from 'axios';
 
 const ProfilePage = () => {
   const [isEditing, setIsEditing] = useState(false);
@@ -20,7 +19,8 @@ const ProfilePage = () => {
     email: '',
     bio: '',
     location: '',
-    website: '',
+    profession: '', // <-- Changed from website to profession
+    avatar: '',
     joinDate: '',
     stats: {
       coursesCompleted: 0,
@@ -30,20 +30,28 @@ const ProfilePage = () => {
     }
   });
 
+  // Fetch profile data
   useEffect(() => {
     const fetchProfileData = async () => {
+      setLoading(true);
       try {
-        const response = await api.get('/users/profile');
+        const token = localStorage.getItem('token'); // Or wherever you store your JWT
+        const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000'; // Use environment variable or default to '/api'
+        
+        const response = await axios.get(`${apiUrl}/api/users/profile`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
         setProfileData(response.data);
+        console.log('Profile data fetched:', response.data);
       } catch (error) {
         console.log('API call failed, using mock data:', error);
-        // Mock data as fallback
         setProfileData({
           name: 'John Doe',
           email: 'john.doe@example.com',
           bio: 'Passionate learner and technology enthusiast. Currently studying web development and machine learning.',
           location: 'San Francisco, CA',
-          website: 'https://johndoe.dev',
+          profession: 'Software Engineer', // <-- Changed from website to profession
+          avatar: '',
           joinDate: 'January 2024',
           stats: {
             coursesCompleted: 12,
@@ -67,10 +75,18 @@ const ProfilePage = () => {
     });
   };
 
+  // Update profile data
   const handleSave = async () => {
     try {
-      await api.put('/users/profile', profileData);
-      console.log('Profile updated successfully');
+      const token = localStorage.getItem('token');
+      // Only send editable fields
+      const { name, email, bio, location, profession } = profileData; // <-- Added email
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+      await axios.put(
+        `${apiUrl}/api/users/profile`,
+        { name, email, bio, location, profession }, // <-- Added email
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
       setIsEditing(false);
     } catch (error) {
       console.log('Failed to update profile:', error);
@@ -83,15 +99,8 @@ const ProfilePage = () => {
     // Reset form data if needed
   };
 
-  const handleAvatarChange = async () => {
-    try {
-      // This would typically open a file picker and upload the image
-      console.log('Avatar change triggered');
-      // await api.post('/users/avatar', formData);
-    } catch (error) {
-      console.log('Failed to update avatar:', error);
-    }
-  };
+
+
 
   // Helper function to get user initials safely
   const getUserInitials = (name: string) => {
@@ -125,17 +134,11 @@ const ProfilePage = () => {
                   <div className="text-center">
                     <div className="relative inline-block">
                       <Avatar className="w-24 h-24 mx-auto">
-                        <AvatarImage src="/placeholder.svg" alt={profileData.name || 'User'} />
-                        <AvatarFallback className="text-2xl">
+                        {/* Only show initials, no image */}
+                        <AvatarFallback className="text-4xl">
                           {getUserInitials(profileData.name)}
                         </AvatarFallback>
                       </Avatar>
-                      {/* <button
-                        onClick={handleAvatarChange}
-                        className="absolute bottom-0 right-0 bg-purple-600 hover:bg-purple-700 text-white p-2 rounded-full"
-                      >
-                        <Camera className="w-4 h-4" />
-                      </button> */}
                     </div>
                     
                     <h2 className="text-xl font-bold mt-4 dark:text-gray-300">{profileData.name || 'User'}</h2>
@@ -165,19 +168,19 @@ const ProfilePage = () => {
                   <div className="space-y-4">
                     <div className="flex justify-between">
                       <span className="text-gray-600 dark:text-gray-300">Courses Completed</span>
-                      <span className="font-semibold">{profileData.stats.coursesCompleted}</span>
+                      <span className="font-semibold">{profileData.stats?.coursesCompleted ?? 0}</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-gray-600 dark:text-gray-300">Hours Learned</span>
-                      <span className="font-semibold">{profileData.stats.hoursLearned}</span>
+                      <span className="font-semibold">{profileData.stats?.hoursLearned ?? 0}</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-gray-600 dark:text-gray-300">Certificates Earned</span>
-                      <span className="font-semibold">{profileData.stats.certificates}</span>
+                      <span className="font-semibold">{profileData.stats?.certificates ?? 0}</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-gray-600 dark:text-gray-300">Current Streak</span>
-                      <span className="font-semibold">{profileData.stats.currentStreak} days</span>
+                      <span className="font-semibold">{profileData.stats?.currentStreak ?? 0} days</span>
                     </div>
                   </div>
                 </CardContent>
@@ -245,11 +248,11 @@ const ProfilePage = () => {
                           />
                         </div>
                         <div>
-                          <Label htmlFor="website">Website</Label>
+                          <Label htmlFor="profession">Profession</Label>
                           <Input
-                            id="website"
-                            name="website"
-                            value={profileData.website}
+                            id="profession"
+                            name="profession"
+                            value={profileData.profession}
                             onChange={handleInputChange}
                             disabled={!isEditing}
                           />

@@ -6,6 +6,13 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true
   },
+  // username: {
+  //   type: String,
+  //   required: true,
+  //   unique: true,
+  //   lowercase: true,
+  //   trim: true
+  // },
   email: {
     type: String,
     required: true,
@@ -23,7 +30,7 @@ const userSchema = new mongoose.Schema({
     type: String,
     default: ''
   },
-  website: {
+  profession: {
     type: String,
     default: ''
   },
@@ -41,6 +48,11 @@ const userSchema = new mongoose.Schema({
     type: String,
     enum: ['user', 'admin'],
     default: 'user'
+  },
+  avatar:{
+    type: String,
+    default: 'https://www.gravatar.com/avatar/'
+
   },
   progress: [{
     course: { type: mongoose.Schema.Types.ObjectId, ref: 'Course' },

@@ -1,23 +1,11 @@
-
 import React, { useState, useEffect } from 'react';
 import PostCard from './PostCard';
-import api from '@/services/api';
+import axios from 'axios';
+import { Post } from '../types/feedType';
 
-interface Post {
-  id: number;
-  user: {
-    name: string;
-    username: string;
-    avatar: string;
-  };
-  content: string;
-  timestamp: string;
-  likes: number;
-  reposts: number;
-  comments: number;
-  isLiked: boolean;
-  isReposted: boolean;
-}
+
+
+
 
 const PostFeed = () => {
   const [posts, setPosts] = useState<Post[]>([]);
@@ -26,78 +14,45 @@ const PostFeed = () => {
   useEffect(() => {
     const fetchPosts = async () => {
       try {
-        // Use the correct backend endpoint that matches your community routes
-        const response = await api.get('/community');
-        console.log('API response:', response.data);
-        
-        // Ensure response.data is an array
-        const postsData = Array.isArray(response.data) ? response.data : [];
+        // Adjust base URL as needed
+        const apiUrl = import.meta.env.VITE_BACKEND_URI || 'http://localhost:5000';
+        const response = await axios.get(`${apiUrl}/api/community`);
+        // Map backend posts to frontend Post interface
+        type BackendPost = {
+          _id: string;
+          user?: {
+            _id?: string;
+            name?: string;
+            username?: string;
+            avatar?: string;
+          };
+          content: string;
+          createdAt: string;
+          likes?: unknown[];
+          comments?: unknown[];
+        };
+
+        const postsData: Post[] = (response.data || []).map((post: BackendPost) => ({
+          _id: post._id,
+          user: {
+            id: post.user?._id,
+            name: post.user?.name || 'Unknown',
+            // Add username/avatar if available in your user model
+            username: post.user?.username || '',
+            avatar: post.user?.avatar || '',
+          },
+          content: post.content,
+          timestamp: new Date(post.createdAt).toLocaleString(),
+          likes: Array.isArray(post.likes) ? post.likes.length : 0,
+          reposts: 0, // Not implemented in backend yet
+          comments: Array.isArray(post.comments) ? post.comments.length : 0,
+          isLiked: false, // You can set this based on current user
+          isReposted: false, // Not implemented in backend yet
+        }));
         setPosts(postsData);
       } catch (error) {
         console.log('API call failed, using mock data:', error);
-        // Mock data as fallback - ensure it's always an array
-        setPosts([
-          {
-            id: 1,
-            user: {
-              name: 'Sarah Chen',
-              username: 'sarahcodes',
-              avatar: 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=40&h=40&fit=crop&crop=face'
-            },
-            content: 'Just completed my first React project! The journey from zero to building a functional web app has been incredible. Next up: learning TypeScript 🚀 #WebDevelopment #ReactJS',
-            timestamp: '2h',
-            likes: 24,
-            reposts: 5,
-            comments: 8,
-            isLiked: false,
-            isReposted: false
-          },
-          {
-            id: 2,
-            user: {
-              name: 'Alex Rodriguez',
-              username: 'alexlearns',
-              avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=40&h=40&fit=crop&crop=face'
-            },
-            content: 'Daily reminder: Consistency beats perfection. Been coding for 30 minutes every day for the past month. Small steps, big progress! 💪 #CodingJourney #ConsistencyIsKey',
-            timestamp: '4h',
-            likes: 67,
-            reposts: 12,
-            comments: 15,
-            isLiked: true,
-            isReposted: false
-          },
-          {
-            id: 3,
-            user: {
-              name: 'Maria Garcia',
-              username: 'mariadata',
-              avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=40&h=40&fit=crop&crop=face'
-            },
-            content: 'Struggling with machine learning concepts? I found that building projects while learning theory helps so much more than just reading textbooks. What\'s your learning style? #MachineLearning #DataScience',
-            timestamp: '6h',
-            likes: 45,
-            reposts: 8,
-            comments: 23,
-            isLiked: false,
-            isReposted: true
-          },
-          {
-            id: 4,
-            user: {
-              name: 'David Kim',
-              username: 'daviddesigns',
-              avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=40&h=40&fit=crop&crop=face'
-            },
-            content: 'UI/UX tip: Always design with accessibility in mind. Color contrast, keyboard navigation, and screen reader compatibility aren\'t afterthoughts - they\'re essentials! #UXDesign #Accessibility',
-            timestamp: '8h',
-            likes: 89,
-            reposts: 31,
-            comments: 19,
-            isLiked: true,
-            isReposted: false
-          }
-        ]);
+        setPosts([]);
       } finally {
         setLoading(false);
       }
@@ -117,7 +72,8 @@ const PostFeed = () => {
   return (
     <div className="space-y-4">
       {Array.isArray(posts) && posts.map((post) => (
-        <PostCard key={post.id} post={post} />
+        
+        <PostCard key={post._id} post={post} />
       ))}
       {(!Array.isArray(posts) || posts.length === 0) && (
         <div className="text-center text-gray-500">No posts available</div>

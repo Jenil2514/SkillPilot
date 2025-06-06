@@ -55,7 +55,7 @@ router.post('/:courseId/resources', auth, async (req, res) => {
       url,
       description,
       tags,
-      user: req.user._id // user ID from auth middleware
+      user: req.user // user ID from auth middleware
     };
 
     course.resources.push(newResource);
@@ -71,7 +71,7 @@ router.post('/:courseId/resources', auth, async (req, res) => {
 router.post('/:courseId/resources/:resourceId/upvote', auth, async (req, res) => {
   try {
     const { courseId, resourceId } = req.params;
-    const userId = req.user._id;
+    const userId = req.user;
 
     const course = await Course.findById(courseId);
     if (!course) return res.status(404).json({ message: 'Course not found' });
@@ -102,7 +102,7 @@ router.post('/:courseId/resources/:resourceId/upvote', auth, async (req, res) =>
 router.post('/:courseId/resources/:resourceId/remove-upvote', auth, async (req, res) => {
   try {
     const { courseId, resourceId } = req.params;
-    const userId = req.user._id;
+    const userId = req.user;
 
     const course = await Course.findById(courseId);
     if (!course) return res.status(404).json({ message: 'Course not found' });

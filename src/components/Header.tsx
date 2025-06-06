@@ -65,7 +65,8 @@ const Header = () => {
             )}
 
             {/* Profile Dropdown */}
-            <ProfileDropdown />
+            {isAuthenticated && <ProfileDropdown /> }
+            
             <ThemeToggle />
             
           </div>

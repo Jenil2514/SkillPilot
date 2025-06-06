@@ -1,5 +1,5 @@
-
 import React, { useState } from 'react';
+import axios from 'axios';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -7,11 +7,31 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 const PostComposer = () => {
   const [postContent, setPostContent] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  const handlePost = () => {
+  const handlePost = async () => {
     if (postContent.trim()) {
-      console.log('Posting:', postContent);
-      setPostContent('');
+      setLoading(true);
+      const apiUrl = import.meta.env.VITE_BACKEND_URI || 'http://localhost:5000';
+
+      const token = localStorage.getItem('token');
+      try {
+        await axios.post(
+          `${apiUrl}/api/community/createpost`,
+          { content: postContent },
+          {
+            headers: {
+              'Content-Type': 'application/json',
+              ...(token && { Authorization: `Bearer ${token}` }),
+            },
+          }
+        );
+        setPostContent('');
+      } catch (error) {
+        console.error('Failed to post:', error);
+      } finally {
+        setLoading(false);
+      }
     }
   };
 
@@ -35,12 +55,12 @@ const PostComposer = () => {
               <div className="text-sm text-gray-500 dark:text-gray-300">
                 {280 - postContent.length} characters remaining
               </div>
-              <Button 
+              <Button
                 onClick={handlePost}
-                disabled={!postContent.trim() || postContent.length > 280}
+                disabled={!postContent.trim() || postContent.length > 280 || loading}
                 className="bg-purple-600 hover:bg-purple-700 text-white"
               >
-                Post
+                {loading ? 'Posting...' : 'Post'}
               </Button>
             </div>
           </div>

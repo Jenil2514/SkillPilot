@@ -18,7 +18,7 @@ router.post('/createpost', auth, async (req, res) => {
   content = validator.escape(content);
 
   try {
-    const post = new Post({ user: req.user._id, content });
+    const post = new Post({ user: req.user, content });
     await post.save();
     res.status(201).json(post);
   } catch (err) {
@@ -40,13 +40,28 @@ router.get('/', async (req, res) => {
 router.post('/:id/like', auth, async (req, res) => {
   try {
     const post = await Post.findById(req.params.id);
-    const alreadyLiked = post.likes.includes(req.user._id);
+    const alreadyLiked = post.likes.includes(req.user);
     if (alreadyLiked) {
-      post.likes.pull(req.user._id);
+      post.likes.pull(req.user);
     } else {
-      post.likes.push(req.user._id);
+      post.likes.push(req.user);
     }
     await post.save();
+    res.json(post);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Get a single post by ID (with user and comments' user info)
+router.get('/:id', async (req, res) => {
+  try {
+    const post = await Post.findById(req.params.id)
+      .populate('user', 'name avatar username')
+      .populate('comments.user', 'name avatar');
+    if (!post) {
+      return res.status(404).json({ message: 'Post not found' });
+    }
     res.json(post);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -67,7 +82,7 @@ router.post('/:id/comment', auth, async (req, res) => {
 
   try {
     const post = await Post.findById(req.params.id);
-    post.comments.push({ user: req.user._id, text });
+    post.comments.push({ user: req.user, text });
     await post.save();
     res.json(post);
   } catch (err) {
@@ -79,8 +94,8 @@ router.post('/:id/comment', auth, async (req, res) => {
 // router.post('/:id/repost', auth, async (req, res) => {
 //   try {
 //     const post = await Post.findById(req.params.id);
-//     if (!post.reposts.includes(req.user._id)) {
-//       post.reposts.push(req.user._id);
+//     if (!post.reposts.includes(req.user.id)) {
+//       post.reposts.push(req.user.id);
 //       await post.save();
 //     }
 //     res.json(post);
