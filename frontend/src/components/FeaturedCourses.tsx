@@ -50,7 +50,7 @@ const FeaturedCourses = () => {
       // Optionally, redirect to login or show a message
       return;
     }
-    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+    const apiUrl = import.meta.env.VITE_BACKEND_URI || 'http://localhost:5000';
     try {
       if (isSaved) {
         await axios.delete(`${apiUrl}/api/users/unsave/${courseId}`, {
