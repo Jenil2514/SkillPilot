@@ -50,7 +50,7 @@ const FeaturedCourses = () => {
       // Optionally, redirect to login or show a message
       return;
     }
-    const apiUrl = import.meta.env.VITE_BACKEND_URI || 'http://localhost:5000';
+    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
     try {
       if (isSaved) {
         await axios.delete(`${apiUrl}/api/users/unsave/${courseId}`, {
@@ -168,9 +168,8 @@ const FeaturedCourses = () => {
                       </div>
                       <button
                         className="bg-purple-600 text-white px-4 py-2 rounded-md hover:bg-purple-700 transition-colors text-sm font-medium"
-                        
                       >
-                       <Link to={`/courses/${course._id}`} >View Course 
+                        <Link to={`/course/${course._id}`}>View Course 
                         </Link>
                       </button>
                     </div>

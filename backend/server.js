@@ -4,6 +4,8 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import rateLimit from 'express-rate-limit';
 import helmet from 'helmet';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
 // Local imports
 import courseRoutes from './routes/courseRoutes.js';
@@ -44,7 +46,6 @@ app.use(sanitizeRequest);
 app.use(express.json({ limit: '5mb' }));
 app.use(express.urlencoded({ limit: '5mb', extended: true }));
 
-
 // Rate limiter
 app.use(rateLimit({
   windowMs: 15 * 60 * 1000,
@@ -63,9 +64,25 @@ app.use('/api/categories', categoryRoutes);
 app.use('/api/universities', universityRoutes);
 app.use('/api/community', communityRoutes);
 
-// 404 handler
-app.use((req, res) => {
-  res.status(404).json({ message: 'Route not found' });
+// 404 handler for API routes
+app.use((req, res, next) => {
+  if (req.path.startsWith('/api/')) {
+    return res.status(404).json({ message: 'Route not found' });
+  }
+  next();
+});
+
+// Serve frontend for all other routes (SPA support)
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+const frontendPath = path.join(__dirname, '../frontend/dist');
+app.use(express.static(frontendPath));
+
+app.get('*', (req, res) => {
+  if (!req.path.startsWith('/api/')) {
+    res.sendFile(path.join(frontendPath, 'index.html'));
+  }
 });
 
 // Global error handler
