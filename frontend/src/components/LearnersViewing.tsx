@@ -18,10 +18,7 @@ const LearnersViewing = () => {
     const apiUrl = import.meta.env.VITE_BACKEND_URI || 'http://localhost:5000';
     const fetchCourses = async () => {
       try {
-        if (!token) {
-          console.error("No authentication token found");
-          return;
-        }
+        // Removed token check here so courses always load
         const res = await axios.get(`${apiUrl}/api/courses`);
         const sortedCourses = res.data.sort((a, b) => (b.views || 0) - (a.views || 0));
         setCourses(sortedCourses);
