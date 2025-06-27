@@ -35,7 +35,10 @@ const app = express();
 
 // Security Middleware
 app.use(helmet());
-app.use(cors());
+app.use(cors({
+  origin: 'https://skill-pilot-lake.vercel.app',
+  credentials: true, // if you use cookies or authentication
+}));
 app.use(express.json());
 app.use(sanitizeRequest);
 // Increase body size limit to 5MB (or more if needed)
