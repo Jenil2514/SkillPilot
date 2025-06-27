@@ -5,7 +5,7 @@ const auth = async (req, res, next) => {
     const rawToken = req.header('Authorization');
     const token = rawToken && rawToken.startsWith('Bearer ') ? rawToken.split(' ')[1] : null;
 
-
+    // console.log("Raw token:", rawToken);
     if (!token) return res.status(401).json({ message: 'No token, access denied' });
 
     try {
@@ -16,7 +16,9 @@ const auth = async (req, res, next) => {
 
         req.user = decoded.id // now req.user includes full user object
         next();
-    } catch (err) {
+    } 
+    catch (err) {
+        console.error("Token verification error:", err);
         res.status(401).json({ message: 'Token is not valid' });
     }
 };

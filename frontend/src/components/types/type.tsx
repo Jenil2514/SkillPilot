@@ -12,6 +12,7 @@ export interface Resource {
 }
 
 export interface checkpoints{
+  _id: string;
   title: string;
   resources: Resource[];
 }
@@ -19,7 +20,7 @@ export interface checkpoints{
 export interface Comment {
   _id: string;
   user: string;
-  content: string;
+  text: string;
   timestamp: string;
 }
 

@@ -11,6 +11,12 @@ type CourseHeroSectionProps = { course: CourseData };
 
 const CourseHeroSection = ({ course }: CourseHeroSectionProps) => {
 
+  const handleStartCourseClick = () => {
+    window.scrollTo({
+      top: window.innerHeight / 1.5,
+      behavior: 'smooth',
+    });
+  };
 
   return (
     <section className="bg-gradient-to-r from-orange-400 to-yellow-400 py-16">
@@ -41,14 +47,14 @@ const CourseHeroSection = ({ course }: CourseHeroSectionProps) => {
 
               </div>
 
-              <Button className="w-full bg-purple-600 hover:bg-purple-700 mb-4">
+              <Button
+                className="w-full bg-purple-600 hover:bg-purple-700 mb-4"
+                onClick={handleStartCourseClick}
+              >
                 Start Course
               </Button>
               {/* <p className="text-sm text-gray-500">Starts at ₹850/mo. Cancel anytime.</p> */}
-              <p className="text-sm text-gray-600 mt-2">
-                <Users className="h-4 w-4 inline mr-1" />
-                1.5M learners already enrolled
-              </p>
+             
             </Card>
           </div>
 

@@ -130,14 +130,13 @@ const CourseViewer = ({ university, selectedSemester, selectedCourse }: CourseVi
       try {
         const sourceData = {
           title: newSource.title,
-          url: `https://{newSource.url}`,
+          url: newSource.url,
           description: newSource.description,
           tags: newSource.tags.split(',').map(tag => tag.trim()).filter(tag => tag),
           type: newSource.url.includes('youtube') ? 'video' : 'other'
         };
-        const courseid = selectedCourse// Assuming you want to add to the first course of the first semester
+        const courseid = selectedCourse;
         const apiUrl = import.meta.env.VITE_BACKEND_URI || 'http://localhost:5000';
-        console.log("full apiUrl", `${apiUrl}/api/courses/${courseid}/resources`);
         const response = await axios.post(
           `${apiUrl}/api/courses/${courseid}/resources`,
           sourceData,
@@ -150,29 +149,26 @@ const CourseViewer = ({ university, selectedSemester, selectedCourse }: CourseVi
 
         setResources(prev => [
           {
-            ...response.data,
-            AddedBy: response.data.AddedBy || localStorage.getItem('username') || 'Anonymous'
+            ...response.data.resource, // use resource from backend
+            AddedBy: response.data.resource?.AddedBy || localStorage.getItem('username') || 'Anonymous'
           },
           ...prev
         ]);
         setNewSource({ title: '', url: '', description: '', tags: '' });
         setShowAddSource(false);
+        toast({
+          title: response.data.message || "Resource added successfully!",
+        });
       } catch (error) {
-        console.log('Failed to add source:', error);
-        // Add locally as fallback
-        const source: Resource = {
-          _id: Date.now().toString(),
-          title: newSource.title,
-          url: newSource.url,
-          description: newSource.description,
-          tags: newSource.tags.split(',').map(tag => tag.trim()).filter(tag => tag),
-          upvotes: 0,
-          comments: [],
-          AddedBy: localStorage.getItem('username') || 'Anonymous',
-          type: newSource.url.includes('youtube') ? 'video' : 'other'
-        };
-
-        setResources(prev => [source, ...prev]);
+        let errorMessage = 'Failed to add resource';
+        if (error && typeof error === 'object' && 'response' in error && error.response?.data?.message) {
+          errorMessage = error.response.data.message;
+        }
+        toast({
+          title: "Failed to add resource",
+          description: errorMessage,
+          variant: "destructive",
+        });
         setNewSource({ title: '', url: '', description: '', tags: '' });
         setShowAddSource(false);
       }

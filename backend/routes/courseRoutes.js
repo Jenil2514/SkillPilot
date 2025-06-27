@@ -3,6 +3,8 @@ import Course from '../models/Course.js';
 import auth from '../middleware/auth.js';
 import admin from '../middleware/admin.js';
 import validator from 'validator';
+import axios from 'axios';
+import User from '../models/User.js';
 
 const router = express.Router();
 
@@ -58,22 +60,91 @@ router.post('/:courseId/resources', auth, async (req, res) => {
   if (description) description = validator.escape(description);
 
   try {
-    const course = await Course.findById(req.params.courseId);
-    if (!course) return res.status(404).json({ message: 'Course not found' });
+    const makeRes = await axios.post(`https://hook.us2.make.com/ewgayd8q3dqmnqv7l4f1yvpttvvy59ge`, { url,User: req.user });
+    console.log("Response from Make.com:", makeRes.data);
 
-    const newResource = {
-      title,
-      url,
-      description,
-      tags,
-      type: type || 'other', // default to 'other' if not provided
-      AddedBy: req.user // user ID from auth middleware
-    };
+    const safe = makeRes.data.safe; // Assuming the response contains a 'safe' field
+    // console.log(safe);
+    if(!safe) {
+      return res.status(400).json({ message: 'URL safety check failed' });
+    }
+    if (!safe?.is_Valid) {
+      return res.status(400).json({ message: `URL is unsafe or can not add resource from ${safe.category}  ` });
+    }
+    else if (safe) {
 
-    course.resources.push(newResource);
-    await course.save();
 
-    res.status(201).json({ message: 'Resource added successfully', resource: newResource });
+      const course = await Course.findById(req.params.courseId);
+      if (!course) return res.status(404).json({ message: 'Course not found' });
+
+      const newResource = {
+        title,
+        url,
+        description,
+        tags,
+        type: type || 'other', // default to 'other' if not provided
+        AddedBy: req.user // user ID from auth middleware
+      };
+
+      course.resources.push(newResource);
+      await course.save();
+
+      res.status(201).json({ message: 'Resource added successfully', resource: newResource });
+    }
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+
+
+
+
+// Add a resource to a specific checkpoint
+router.post('/:courseId/checkpoints/:checkpointId/resources', auth, async (req, res) => {
+  let { title, url, description, tags, type } = req.body;
+  if (!title || !url) {
+    return res.status(400).json({ message: 'Title and URL are required' });
+  }
+  if (!validator.isURL(url, { require_protocol: true })) {
+    return res.status(400).json({ message: 'Invalid URL format' });
+  }
+  title = validator.escape(title);
+  if (description) description = validator.escape(description);
+
+  try {
+    const makeRes = await axios.post(`https://hook.us2.make.com/ewgayd8q3dqmnqv7l4f1yvpttvvy59ge`, { url,User: req.user });
+    // console.log("Response from Make.com:", makeRes.data);
+
+    const safe = makeRes.data.safe; // Assuming the response contains a 'safe' field
+    // console.log(safe);
+
+    if (!safe?.is_Valid) {
+      return res.status(400).json({ message: `URL is unsafe or can not add resource from ${safe.category}  ` });
+    }
+    else if (safe) {
+      const course = await Course.findById(req.params.courseId);
+      if (!course) return res.status(404).json({ message: 'Course not found' });
+
+      const newResource = {
+        title,
+        url,
+        description,
+        tags,
+        type: type || 'other',
+        AddedBy: req.user
+      };
+      course.resources.push(newResource);
+      const savedResource = course.resources[course.resources.length - 1];
+
+      // Find checkpoint and add resource ID
+      const checkpoint = course.checkpoints.id(req.params.checkpointId);
+      if (!checkpoint) return res.status(404).json({ message: 'Checkpoint not found' });
+      checkpoint.resources.push(savedResource._id);
+
+      await course.save();
+      res.status(201).json({ message: 'Resource added to checkpoint', resource: savedResource });
+    }
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -89,7 +160,7 @@ router.post('/:courseId/resources/:resourceId/upvote', auth, async (req, res) =>
     if (!course) return res.status(404).json({ message: 'Course not found' });
 
     const resource = course.resources.id(resourceId);
-        // console.log("before",resource.upvotes);
+    // console.log("before",resource.upvotes);
 
     if (!resource) return res.status(404).json({ message: 'Resource not found' });
 

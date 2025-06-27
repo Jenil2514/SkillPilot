@@ -15,7 +15,7 @@ router.post('/createpost', auth, async (req, res) => {
   }
 
   // Sanitize content
-  content = validator.escape(content);
+  content = content.trim();
 
   try {
     const post = new Post({ user: req.user, content });

@@ -5,7 +5,7 @@ import Footer from '@/components/Footer';
 import CourseHeroSection from '@/components/course/CourseHeroSection';
 import CourseContent from '@/components/course/CourseContent';
 import CourseFAQ from '@/components/course/CourseFAQ';
-import RelatedCourses from '@/components/course/RelatedCourses';
+import LearnersViewing from '@/components/LearnersViewing';
 import axios from 'axios';
 import { CourseData } from '@/components/types/type';
 
@@ -23,7 +23,7 @@ const CoursePage = () => {
         // Fetch course data
         const res = await axios.get(`${apiUrl}/api/courses/${courseId}`);
         setCourse(res.data);
-        console.log('Course data fetched:', res.data);
+        // console.log('Course data fetched:', res.data);
       } catch (err) {
         setCourse(null);
       } finally {
@@ -42,8 +42,8 @@ const CoursePage = () => {
       <CourseHeroSection course={course} />
       <CourseContent course={course}/>
       {/* <CourseTestimonials /> */}
-      <CourseFAQ />
-      <RelatedCourses />
+      {/* <CourseFAQ /> */}
+      <LearnersViewing />
       <Footer />
     </div>
   );

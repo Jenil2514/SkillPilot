@@ -1,49 +1,43 @@
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Star, Clock, Heart, MessageCircle, Youtube, Dock, FileText, BookOpen, Link2, Heart as HeartFilled } from 'lucide-react';
-import CourseTopicItem from './CourseTopicItem';
-import CourseLinkItem from './CourseLinkItem';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Button } from '@/components/ui/button';
+import { Heart, Youtube, Dock, FileText, BookOpen, Link2, Heart as HeartFilled } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Comment } from '../types/type';
 import axios from 'axios';
-import { CourseData,Resource ,checkpoints} from '../types/type';
+import { CourseData, Resource, checkpoints } from '../types/type';
 import { useToast } from '@/hooks/use-toast'; // Import your toast hook
 
 
 
-interface Comment {
-  id: string;
-  user: string;
-  content: string;
-  timestamp: string;
-}
 
-interface CourseTopic {
-  _id: string;
-    name: string;
-    image: string;
-    views: number;
-    description: string;
-    resources: Resource[];
-    checkpoints: checkpoints[];
-}
-interface CourseContentPorps{
+
+
+interface CourseContentPorps {
   course: CourseData;
 }
 const CourseContent = ({ course }: CourseContentPorps) => {
-  const [openSections, setOpenSections] = useState<string[]>(['01']);
   const [upvotedLinks, setUpvotedLinks] = useState<string[]>([]);
   const [upvoteCounts, setUpvoteCounts] = useState<{ [id: string]: number }>({});
-  const [showComments, setShowComments] = useState<string | null>(null);
-  const [newComment, setNewComment] = useState('');
-  const [completedTopics, setCompletedTopics] = useState<string[]>(['01']);
+  const [showAddSourceCheckpoint, setShowAddSourceCheckpoint] = useState<string | null>(null);
   const [completedCheckpoints, setCompletedCheckpoints] = useState<string[]>([]);
-  const [courseTopics, setCourseTopics] = useState<CourseData[]>([]);
   const [loading, setLoading] = useState(true);
-  const [courseComments, setCourseComments] = useState<Comment[]>([]);
   const [sidebarComment, setSidebarComment] = useState('');
-  const [sidebarShowComments, setSidebarShowComments] = useState(true);
   const [sidebarResourceId, setSidebarResourceId] = useState<string | null>(null);
   const [sidebarResourceComments, setSidebarResourceComments] = useState<Comment[]>([]);
+  const [userNames, setUserNames] = useState<{ [userId: string]: string }>({});
+
   const { toast } = useToast();
+  // Add source form state
+  const [newSource, setNewSource] = useState({
+    title: '',
+    url: '',
+    description: '',
+    tags: ''
+  });
+
 
   // Helper: localStorage key for this course
   const localKey = `progress_${course._id}`;
@@ -93,7 +87,7 @@ const CourseContent = ({ course }: CourseContentPorps) => {
       });
     }
     setUpvoteCounts(counts);
-  }, [course._id, course.resources]);
+  }, [course._id, course.resources, upvoteKey]);
 
   // Save upvotedLinks to localStorage whenever it changes
   useEffect(() => {
@@ -127,14 +121,52 @@ const CourseContent = ({ course }: CourseContentPorps) => {
     }
   };
 
-  const toggleSection = (sectionId: string) => {
-    setOpenSections(prev => 
-      prev.includes(sectionId) 
-        ? prev.filter(id => id !== sectionId)
-        : [...prev, sectionId]
-    );
+
+  //------------------------------------Done ADD RESOURCE------------------------------------
+  const handleAddSource = async (checkpointId: string) => {
+    if (newSource.title && newSource.url && newSource.description) {
+      try {
+        const sourceData = {
+          title: newSource.title,
+          url: newSource.url,
+          description: newSource.description,
+          tags: newSource.tags.split(',').map(tag => tag.trim()).filter(tag => tag),
+          type: newSource.url.includes('youtube') ? 'video' : 'other'
+        };
+        const apiUrl = import.meta.env.VITE_BACKEND_URI || 'http://localhost:5000';
+        // POST to the checkpoint-specific endpoint
+        const response = await axios.post(
+          `${apiUrl}/api/courses/${course._id}/checkpoints/${checkpointId}/resources`,
+          sourceData,
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem('token')}`
+            }
+          }
+        );
+        // Optionally update local state here if needed
+        setNewSource({ title: '', url: '', description: '', tags: '' });
+        setShowAddSourceCheckpoint(null);
+        toast({
+          title: response.data.message || "Resource added successfully!",
+        });
+      } catch (error: any) {
+        let errorMessage = 'Failed to add resource';
+        if (error && typeof error === 'object' && 'response' in error && error.response?.data?.message) {
+          errorMessage = error.response.data.message;
+        }
+        toast({
+          title: "Failed to add resource",
+          description: errorMessage,
+          variant: "destructive",
+        });
+        setNewSource({ title: '', url: '', description: '', tags: '' });
+        setShowAddSourceCheckpoint(null);
+      }
+    }
   };
 
+  // Find the selected course
 
 
   const handleUpvote = async (resourceId: string) => {
@@ -212,14 +244,7 @@ const CourseContent = ({ course }: CourseContentPorps) => {
 
 
 
-  // Example: Fetch course-level comments (adapt API as needed)
-  useEffect(() => {
-    // Replace with your API call
-    setCourseComments([
-      { id: '1', user: 'Alice', content: 'Great course!', timestamp: '2h ago' },
-      { id: '2', user: 'Bob', content: 'Very helpful.', timestamp: '1h ago' }
-    ]);
-  }, [course._id]);
+
 
   const handleSidebarAddComment = async () => {
     if (!sidebarComment.trim() || !sidebarResourceId) return;
@@ -242,6 +267,35 @@ const CourseContent = ({ course }: CourseContentPorps) => {
     }
   };
 
+  // Fetch user name by user ID
+  const fetchUserName = async (userId: string) => {
+    if (!userId || userNames[userId]) return;
+    try {
+      const apiUrl = import.meta.env.VITE_BACKEND_URI || 'http://localhost:5000';
+      const res = await axios.get(`${apiUrl}/api/users/name/${userId}`);
+      setUserNames(prev => ({ ...prev, [userId]: res.data.name }));
+    } catch {
+      setUserNames(prev => ({ ...prev, [userId]: 'Anonymous' }));
+    }
+  };
+
+  // Call fetchUserName for each AddedBy in visible resources
+  useEffect(() => {
+    const addedByIds = new Set<string>();
+    course.checkpoints.forEach(checkpoint => {
+      checkpoint.resources.forEach(resId => {
+        const resource = course.resources.find(r => r._id === resId);
+        if (resource && resource.AddedBy) {
+          addedByIds.add(resource.AddedBy);
+        }
+      });
+    });
+    addedByIds.forEach(userId => {
+      fetchUserName(userId);
+    });
+    // eslint-disable-next-line
+  }, [course]);
+
   const handleToggleResourceComments = async (resourceId: string) => {
     if (sidebarResourceId === resourceId) {
       setSidebarResourceId(null);
@@ -255,7 +309,7 @@ const CourseContent = ({ course }: CourseContentPorps) => {
         );
         // Fetch user info for avatars
         const commentsWithUser = await Promise.all(
-          (res.data.comments || []).map(async (c: any, idx: number) => {
+          (res.data.comments || []).map(async (c: Comment, idx: number) => {
             let user = { name: 'User', avatar: '' };
             try {
               const userRes = await axios.get(`${apiUrl}/api/users/profile/${c.user}`);
@@ -316,70 +370,153 @@ const CourseContent = ({ course }: CourseContentPorps) => {
                 {Array.isArray(course.checkpoints) && course.checkpoints.map((checkpoint) => (
                   <Card key={checkpoint.title} className="mb-4">
                     <CardHeader>
-                      <CardTitle className="text-xl flex items-center gap-2">
-                        <input
-                          type="checkbox"
-                          checked={completedCheckpoints.includes(checkpoint._id)}
-                          onChange={e => handleCheckpointToggle(checkpoint._id, e.target.checked)}
-                          className="mr-2"
-                        />
-                        {checkpoint.title}
+                      <CardTitle className="text-xl flex items-center gap-5 justify-between">
+                        <span className="flex items-center gap-2">
+                          <input
+                            type="checkbox"
+                            checked={completedCheckpoints.includes(checkpoint._id)}
+                            onChange={e => handleCheckpointToggle(checkpoint._id, e.target.checked)}
+                            className="mr-2"
+                          />
+                          {checkpoint.title}
+                        </span>
+                        {/* Add Resource Button */}
+                        <button
+                          className="px-2 py-1 bg-purple-600 text-white rounded text-sm"
+                          onClick={() => setShowAddSourceCheckpoint(checkpoint._id)}
+                          type="button"
+                        >
+                          + Add Resource
+                        </button>
                       </CardTitle>
+                      {/* Add Source Form for this checkpoint */}
+                      {showAddSourceCheckpoint === checkpoint._id && (
+                        <Card className="border-purple-200 mt-2">
+                          <CardHeader>
+                            <CardTitle className="text-lg">Add New Source</CardTitle>
+                          </CardHeader>
+                          <CardContent className="space-y-4">
+                            <div>
+                              <label className="block text-sm font-medium mb-2">Title *</label>
+                              <Input
+                                placeholder="Enter source title"
+                                value={newSource.title}
+                                required={true}
+                                onChange={(e) => setNewSource(prev => ({ ...prev, title: e.target.value }))}
+                              />
+                            </div>
+
+                            <div>
+                              <label className="block text-sm font-medium mb-2">URL *</label>
+                              <Input
+                                placeholder="https://..."
+                                value={newSource.url}
+                                required={true}
+                                onChange={(e) => setNewSource(prev => ({ ...prev, url: e.target.value }))}
+                              />
+                            </div>
+
+                            <div>
+                              <label className="block text-sm font-medium mb-2">Description *</label>
+                              <Textarea
+                                placeholder="Describe what this source covers..."
+                                value={newSource.description}
+                                required={true}
+                                onChange={(e) => setNewSource(prev => ({ ...prev, description: e.target.value }))}
+                              />
+                            </div>
+
+                            <div>
+                              <label className="block text-sm font-medium mb-2">Tags</label>
+                              <Input
+                                placeholder="beginner, tutorial, advanced (comma separated)"
+                                value={newSource.tags}
+                                required={true}
+                                onChange={(e) => setNewSource(prev => ({ ...prev, tags: e.target.value }))}
+                              />
+                            </div>
+
+                            <div className="flex space-x-2">
+                              <Button onClick={() => handleAddSource(checkpoint._id)} className="bg-purple-600 hover:bg-purple-700 text-white">
+                                Add Source
+                              </Button>
+                              <Button variant="outline" onClick={() => setShowAddSourceCheckpoint(null)}>
+                                Cancel
+                              </Button>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      )}
                     </CardHeader>
                     <CardContent>
                       {checkpoint.resources && checkpoint.resources.length > 0 ? (
-                        <ul className="space-y-2">
-                          {checkpoint.resources.map((resId: string) => {
-                            const resource = course.resources.find(r => r._id === resId);
-                            if (!resource) return null;
-                            return (
-                              <li key={resource._id}>
-                                <div className="border rounded p-4 flex flex-col gap-2 bg-white shadow-sm">
-                                  <div className="flex items-center justify-between">
-                                    <div>
-                                      {/* Show icon before resource title */}
-                                      {getResourceIcon(resource.type)}
-                                      <span className="font-semibold">{resource.title}</span>
-                                      <span className="ml-2 text-xs px-2 py-1 rounded bg-gray-100 text-gray-600">
-                                        {resource.type === 'video'
-                                          ? 'YouTube'
-                                          : resource.type === 'other'
-                                            ? 'Article'
-                                            : resource.type.charAt(0).toUpperCase() + resource.type.slice(1)}
-                                      </span>
-                                    </div>
-                                    <div className="flex items-center gap-2">
-                                      <a
-                                        href={resource.url}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="text-blue-600 underline text-sm"
-                                      >
-                                        Open
-                                      </a>
-                                      <button
-                                        className={`text-sm px-2 py-1 rounded border ${upvotedLinks.includes(resource._id) ? 'bg-red-100 text-red-600 border-red-200' : 'bg-gray-100 text-gray-600 border-gray-200'}`}
-                                        onClick={() => handleUpvote(resource._id)}
-                                      >
-                                        {upvotedLinks.includes(resource._id) ? (
-                                          <HeartFilled className="inline h-4 w-4 mr-1 fill-red-600 text-red-600" />
-                                        ) : (
-                                          <Heart className="inline h-4 w-4 mr-1" />
-                                        )}
-                                        {upvoteCounts[resource._id] || 0}
-                                      </button>
-                                      <button
-                                        className="text-sm px-2 py-1 rounded bg-gray-100 border border-gray-200 text-gray-600"
-                                        onClick={() => handleToggleResourceComments(resource._id)}
-                                      >
-                                        💬 Comment
-                                      </button>
+                        <ul
+                          className="space-y-2 max-h-64 overflow-y-auto pr-2" // fixed height and scroll
+                          style={{ minHeight: '64px' }}
+                        >
+                          {checkpoint.resources
+                            .map((res: string | Resource) => {
+                              // If res is a string, treat as resource ID; if object, get its _id
+                              const resId = typeof res === 'string' ? res : res._id;
+                              return course.resources.find(r => r._id === resId);
+                            })
+                            .filter(Boolean)
+                            .sort((a, b) => (b?.upvotes || 0) - (a?.upvotes || 0)) // sort by upvotes descending
+                            .map(resource => {
+                              if (!resource) return null;
+                              return (
+                                <li key={resource._id}>
+                                  <div className="border rounded p-4 flex flex-col gap-2 bg-white shadow-sm">
+                                    <div className="flex items-center justify-between">
+                                      <div>
+                                        {getResourceIcon(resource.type)}
+                                        <span className="font-semibold">{resource.title}</span>
+                                        <span className="ml-2 text-xs px-2 py-1 rounded bg-gray-100 text-gray-600">
+                                          {resource.type === 'video'
+                                            ? 'YouTube'
+                                            : resource.type === 'other'
+                                              ? 'Article'
+                                              : resource.type.charAt(0).toUpperCase() + resource.type.slice(1)
+                                          }
+                                          <p className="text-xs text-gray-500 mt-2 hover:underline cursor-pointer" >
+                                            <Link to={`/user/${resource.AddedBy}`}>
+                                              Added by {userNames[resource.AddedBy] || 'Anonymous'}
+                                            </Link>
+                                          </p>
+                                        </span>
+                                      </div>
+                                      <div className="flex items-center gap-2">
+                                        <a
+                                          href={resource.url}
+                                          target="_blank"
+                                          rel="noopener noreferrer"
+                                          className="text-blue-600 underline text-sm"
+                                        >
+                                          Open
+                                        </a>
+                                        <button
+                                          className={`text-sm px-2 py-1 rounded border ${upvotedLinks.includes(resource._id) ? 'bg-red-100 text-red-600 border-red-200' : 'bg-gray-100 text-gray-600 border-gray-200'}`}
+                                          onClick={() => handleUpvote(resource._id)}
+                                        >
+                                          {upvotedLinks.includes(resource._id) ? (
+                                            <HeartFilled className="inline h-4 w-4 mr-1 fill-red-600 text-red-600" />
+                                          ) : (
+                                            <Heart className="inline h-4 w-4 mr-1" />
+                                          )}
+                                          {upvoteCounts[resource._id] || 0}
+                                        </button>
+                                        <button
+                                          className="text-sm px-2 py-1 rounded bg-gray-100 border border-gray-200 text-gray-600"
+                                          onClick={() => handleToggleResourceComments(resource._id)}
+                                        >
+                                          💬 Comment
+                                        </button>
+                                      </div>
                                     </div>
                                   </div>
-                                </div>
-                              </li>
-                            );
-                          })}
+                                </li>
+                              );
+                            })}
                         </ul>
                       ) : (
                         <div className="text-gray-500">No resources for this checkpoint.</div>
@@ -452,23 +589,21 @@ const CourseContent = ({ course }: CourseContentPorps) => {
                       sidebarResourceComments.length === 0
                         ? <div className="text-gray-500 text-sm">No comments yet.</div>
                         : sidebarResourceComments.map(comment => (
-                            <div key={comment.id} className="bg-gray-50 p-3 rounded flex gap-3 items-start">
-                              {comment.avatar ? (
-                                <img src={comment.avatar} alt={comment.user} className="w-8 h-8 rounded-full" />
-                              ) : (
-                                <div className="w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center text-gray-600 font-bold">
-                                  {comment.user?.[0]?.toUpperCase() || 'U'}
-                                </div>
-                              )}
-                              <div>
-                                <div className="flex justify-between items-center mb-1">
-                                  <span className="font-medium text-sm">{comment.user}</span>
-                                  <span className="text-xs text-gray-500">{comment.timestamp}</span>
-                                </div>
-                                <p className="text-sm">{comment.content}</p>
-                              </div>
+                          <div key={comment.id} className="bg-gray-50 p-3 rounded flex gap-3 items-start">
+
+                            <div className="w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center text-gray-600 font-bold">
+                              {comment.user?.[0]?.toUpperCase() || 'U'}
                             </div>
-                          ))
+
+                            <div>
+                              <div className="flex justify-between items-center mb-1">
+                                <span className="font-medium text-sm">{comment.user}</span>
+                                <span className="text-xs text-gray-500">{comment.timestamp}</span>
+                              </div>
+                              <p className="text-sm">{comment.content}</p>
+                            </div>
+                          </div>
+                        ))
                     ) : (
                       <div className="text-gray-500 text-sm">Select a resource to view comments.</div>
                     )}

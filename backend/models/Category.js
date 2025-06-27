@@ -1,5 +1,4 @@
 // models/Category.js
-import { Icon } from 'lucide-react';
 import mongoose from 'mongoose';
 
 const categorySchema = new mongoose.Schema({
