@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
@@ -7,6 +6,18 @@ import { Button } from '@/components/ui/button';
 import courseService from '@/services/courseService';
 import { CourseData, } from '@/components/types/type';
 import { useNavigate } from 'react-router-dom';
+
+// Skeleton Loader for SavedCourses
+const SavedCoursesSkeleton = () => (
+  <div className="container mx-auto px-4 py-8 animate-pulse">
+    <div className="h-8 bg-gray-200 rounded w-1/3 mb-4" />
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {[...Array(6)].map((_, i) => (
+        <div key={i} className="h-40 bg-gray-100 rounded mb-4" />
+      ))}
+    </div>
+  </div>
+);
 
 const SavedCourses = () => {
   const [savedCourses, setSavedCourses] = useState<CourseData[]>([]);
@@ -39,9 +50,7 @@ const SavedCourses = () => {
     return (
       <div className="min-h-screen bg-background">
         <Header />
-        <div className="container mx-auto px-4 py-8">
-          <div className="text-center">Loading saved courses...</div>
-        </div>
+        <SavedCoursesSkeleton />
         <Footer />
       </div>
     );

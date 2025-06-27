@@ -13,7 +13,21 @@ import { Link } from 'react-router-dom';
 
 // import { CourseData } from '@/components/types/type';
 
-const CourseViewer = ({ university, selectedSemester, selectedCourse }: CourseViewerProps) => {
+const CourseViewerSkeleton = () => (
+  <Card className="animate-pulse">
+    <CardHeader>
+      <CardTitle>Course Details</CardTitle>
+    </CardHeader>
+    <CardContent>
+      <div className="h-6 bg-gray-100 rounded w-1/2 mb-4" />
+      <div className="h-4 bg-gray-100 rounded w-full mb-2" />
+      <div className="h-4 bg-gray-100 rounded w-3/4 mb-2" />
+      <div className="h-4 bg-gray-100 rounded w-2/3 mb-2" />
+    </CardContent>
+  </Card>
+);
+
+const CourseViewer = ({ university, selectedSemester, selectedCourse, loading = false }: CourseViewerProps) => {
   const [sources, setResources] = useState<Resource[]>([]);
   const [upvotedSources, setUpvotedSources] = useState<string[]>([]);
   const [showAddSource, setShowAddSource] = useState(false);
@@ -219,6 +233,8 @@ const CourseViewer = ({ university, selectedSemester, selectedCourse }: CourseVi
   }, [selectedCourseResources]);
 
 
+  if (loading) return <CourseViewerSkeleton />;
+
   return (
     <Card>
       <CardHeader>
@@ -228,7 +244,7 @@ const CourseViewer = ({ university, selectedSemester, selectedCourse }: CourseVi
               {selectedCourseData ? selectedCourseData.name : ''}
             </CardTitle>
             <p className="text-sm text-gray-600 mt-1">
-              {universityData ? universityData.name : ''} • Semester:{universityData?.semesters.find(semester => semester._id === selectedSemester)?.number || 'N/A'}
+              {universityData ? universityData.name : ''} 
             </p>
           </div>
           <Button

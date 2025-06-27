@@ -5,6 +5,14 @@ import { Post } from '../types/feedType';
 
 const PAGE_SIZE = 10;
 
+const PostFeedSkeleton = () => (
+  <div className="space-y-4 animate-pulse">
+    {[...Array(5)].map((_, i) => (
+      <div key={i} className="bg-gray-100 rounded-lg h-32 w-full" />
+    ))}
+  </div>
+);
+
 const PostFeed = () => {
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
@@ -80,6 +88,8 @@ const PostFeed = () => {
 
     if (loaderRef.current) observer.current.observe(loaderRef.current);
   }, [loading, hasMore]);
+
+  if (loading) return <PostFeedSkeleton />;
 
   return (
     <div className="space-y-4">

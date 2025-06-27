@@ -17,13 +17,38 @@ import { useToast } from '@/hooks/use-toast'; // Import your toast hook
 
 interface CourseContentPorps {
   course: CourseData;
+  loading?: boolean;
 }
-const CourseContent = ({ course }: CourseContentPorps) => {
+// Skeleton Loader for CourseContent
+const CourseContentSkeleton = () => (
+  <section className="py-12 bg-gray-50 animate-pulse">
+    <div className="container mx-auto px-4">
+      <div className="grid lg:grid-cols-3 gap-8">
+        <div className="lg:col-span-2">
+          <div className="bg-white rounded-lg p-6 mb-4">
+            <div className="h-6 bg-gray-200 rounded w-1/3 mb-2" />
+            <div className="h-4 bg-gray-200 rounded w-1/4 mb-4" />
+            {[...Array(3)].map((_, i) => (
+              <div key={i} className="h-16 bg-gray-100 rounded mb-4" />
+            ))}
+          </div>
+        </div>
+        <div>
+          <div className="bg-white rounded-lg p-6">
+            <div className="h-6 bg-gray-200 rounded w-1/2 mb-4" />
+            <div className="h-4 bg-gray-100 rounded w-full mb-2" />
+            <div className="h-4 bg-gray-100 rounded w-3/4 mb-2" />
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+);
+const CourseContent = ({ course, loading = false }: CourseContentPorps) => {
   const [upvotedLinks, setUpvotedLinks] = useState<string[]>([]);
   const [upvoteCounts, setUpvoteCounts] = useState<{ [id: string]: number }>({});
   const [showAddSourceCheckpoint, setShowAddSourceCheckpoint] = useState<string | null>(null);
   const [completedCheckpoints, setCompletedCheckpoints] = useState<string[]>([]);
-  const [loading, setLoading] = useState(true);
   const [sidebarComment, setSidebarComment] = useState('');
   const [sidebarResourceId, setSidebarResourceId] = useState<string | null>(null);
   const [sidebarResourceComments, setSidebarResourceComments] = useState<Comment[]>([]);
@@ -47,7 +72,6 @@ const CourseContent = ({ course }: CourseContentPorps) => {
   // Fetch user progress on mount
   useEffect(() => {
     const fetchProgress = async () => {
-      setLoading(true);
       try {
         // Try localStorage first for instant UI
         const local = localStorage.getItem(localKey);
@@ -69,7 +93,6 @@ const CourseContent = ({ course }: CourseContentPorps) => {
       } catch (err) {
         // fallback to localStorage only
       }
-      setLoading(false);
     };
     fetchProgress();
     // eslint-disable-next-line
@@ -354,6 +377,8 @@ const CourseContent = ({ course }: CourseContentPorps) => {
         return <Link2 className="inline h-5 w-5 text-gray-400 mr-1" />;
     }
   };
+
+  if (loading) return <CourseContentSkeleton />;
 
   return (
     <section className="py-12 bg-gray-50">

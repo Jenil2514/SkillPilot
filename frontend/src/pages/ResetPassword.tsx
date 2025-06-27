@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import Header from '@/components/Header';
@@ -11,6 +10,19 @@ import { InputOTP, InputOTPGroup, InputOTPSlot } from '@/components/ui/input-otp
 import { ArrowLeft, Lock, Mail } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import api from '@/services/api';
+
+// Skeleton Loader for ResetPassword
+const ResetPasswordSkeleton = () => (
+  <div className="flex justify-center items-center min-h-screen bg-background animate-pulse">
+    <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
+      <div className="h-8 bg-gray-200 rounded w-2/3 mb-6" />
+      <div className="h-4 bg-gray-100 rounded w-full mb-4" />
+      <div className="h-4 bg-gray-100 rounded w-full mb-4" />
+      <div className="h-4 bg-gray-100 rounded w-full mb-4" />
+      <div className="h-10 bg-gray-300 rounded w-full mt-6" />
+    </div>
+  </div>
+);
 
 const ResetPassword = () => {
   const [email, setEmail] = useState('');
@@ -75,6 +87,8 @@ const ResetPassword = () => {
       setLoading(false);
     }
   };
+
+  if (loading) return <ResetPasswordSkeleton />;
 
   return (
     <div className="min-h-screen bg-background">

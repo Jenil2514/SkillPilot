@@ -7,16 +7,40 @@ import { CourseData } from '../types/type';
 
 
 
-type CourseHeroSectionProps = { course: CourseData };
+type CourseHeroSectionProps = { course: CourseData, loading?: boolean };
 
-const CourseHeroSection = ({ course }: CourseHeroSectionProps) => {
+// Skeleton Loader for CourseHeroSection
+const CourseHeroSectionSkeleton = () => (
+  <section className="bg-gradient-to-r from-orange-400 to-yellow-400 py-16 animate-pulse">
+    <div className="container mx-auto px-4">
+      <div className="grid lg:grid-cols-2 gap-8 items-center">
+        <div className="text-white">
+          <div className="bg-white p-8 max-w-md rounded-lg">
+            <div className="h-8 bg-gray-200 rounded w-3/4 mb-4" />
+            <div className="h-4 bg-gray-200 rounded w-full mb-6" />
+            <div className="h-4 bg-gray-200 rounded w-1/2 mb-6" />
+            <div className="h-10 bg-gray-300 rounded w-full mb-4" />
+          </div>
+        </div>
+        <div className="relative flex justify-center">
+          <div className="bg-white rounded-lg flex flex-col items-center p-8 w-[500px] min-h-[256px] overflow-hidden">
+            <div className="w-56 h-56 bg-gray-200 rounded-lg mb-4" />
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+);
 
+const CourseHeroSection = ({ course, loading = false }: CourseHeroSectionProps) => {
   const handleStartCourseClick = () => {
     window.scrollTo({
       top: window.innerHeight / 1.5,
       behavior: 'smooth',
     });
   };
+
+  if (loading) return <CourseHeroSectionSkeleton />;
 
   return (
     <section className="bg-gradient-to-r from-orange-400 to-yellow-400 py-16">

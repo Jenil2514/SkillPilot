@@ -12,7 +12,27 @@ interface CourseCardProps {
   badge?: string;
   initiallyBookmarked?: boolean;
   onBookmarkToggle?: (courseId: string, currentlyBookmarked: boolean) => void; // Add this
+  loading?: boolean; // Add loading prop
 }
+
+// Skeleton Loader for CourseCard
+const CourseCardSkeleton = () => (
+  <div className="bg-background rounded-lg shadow-sm animate-pulse">
+    <div className="relative">
+      <div className="w-full h-48 bg-gray-200 rounded-t-lg mb-2" />
+      <div className="absolute top-2 right-2 w-8 h-8 bg-gray-300 rounded-full" />
+    </div>
+    <div className="p-4 flex justify-between items-center">
+      <div className="flex-1">
+        <div className="h-4 bg-gray-200 rounded w-3/4 mb-2" />
+      </div>
+      <div className="flex items-center ml-4">
+        <div className="h-4 w-4 bg-gray-200 rounded mr-1" />
+        <div className="h-4 w-8 bg-gray-200 rounded" />
+      </div>
+    </div>
+  </div>
+);
 
 const CourseCard = ({
   courseId,
@@ -22,9 +42,10 @@ const CourseCard = ({
   badge,
   initiallyBookmarked = false,
   onBookmarkToggle,
+  loading = false,
 }: CourseCardProps) => {
   const [isBookmarked, setIsBookmarked] = useState(initiallyBookmarked);
-  const [loading, setLoading] = useState(false);
+  const [loadingState, setLoading] = useState(false);
 
   // Sync with parent prop if it changes
   useEffect(() => {
@@ -66,6 +87,8 @@ const CourseCard = ({
     }
   };
 
+  if (loading) return <CourseCardSkeleton />;
+
   return (
     <Link to={`/course/${courseId}`} className="block">
       <div className="bg-background rounded-lg shadow-sm hover:shadow-lg transition-shadow cursor-pointer group">
@@ -83,7 +106,7 @@ const CourseCard = ({
           <button
             onClick={handleBookmark}
             className="absolute top-2 right-2 p-2 rounded-full bg-white/80 hover:bg-white transition-colors"
-            disabled={loading}
+            disabled={loadingState}
           >
             <Bookmark
               className={`h-4 w-4 ${

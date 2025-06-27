@@ -23,6 +23,19 @@ interface UserProfileData {
   };
 }
 
+// Skeleton Loader for UserProfile
+const UserProfileSkeleton = () => (
+  <div className="flex justify-center items-center min-h-screen bg-background animate-pulse">
+    <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
+      <div className="h-24 w-24 bg-gray-200 rounded-full mx-auto mb-6" />
+      <div className="h-8 bg-gray-200 rounded w-2/3 mb-4 mx-auto" />
+      <div className="h-4 bg-gray-100 rounded w-1/2 mb-2 mx-auto" />
+      <div className="h-4 bg-gray-100 rounded w-1/3 mb-2 mx-auto" />
+      <div className="h-4 bg-gray-100 rounded w-1/4 mb-2 mx-auto" />
+    </div>
+  </div>
+);
+
 const UserProfile = () => {
   const { userId } = useParams<{ userId: string }>();
   const [loading, setLoading] = useState(true);
@@ -57,17 +70,7 @@ const UserProfile = () => {
     return name.split(' ').map(n => n[0]).join('').toUpperCase();
   };
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-50">
-        <Header />
-        <div className="container mx-auto px-4 py-8">
-          <div className="text-center">Loading user profile...</div>
-        </div>
-        <Footer />
-      </div>
-    );
-  }
+  if (loading) return <UserProfileSkeleton />;
 
   if (error || !userProfile) {
     return (

@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import Header from '@/components/Header';
 import ShortsViewer from '@/components/shorts/ShortsViewer';
@@ -8,6 +7,15 @@ import { Button } from '@/components/ui/button';
 import { Shuffle, Play, Plus } from 'lucide-react';
 
 type ViewMode = 'browse' | 'create' | 'random';
+
+// Skeleton Loader for ShortsPage
+const ShortsSkeleton = () => (
+  <div className="flex flex-col items-center justify-center min-h-[60vh] animate-pulse">
+    <div className="h-10 w-1/2 bg-gray-800 rounded mb-6" />
+    <div className="h-64 w-full max-w-2xl bg-gray-700 rounded mb-4" />
+    <div className="h-10 w-1/3 bg-gray-800 rounded mb-4" />
+  </div>
+);
 
 const ShortsPage = () => {
   const [viewMode, setViewMode] = useState<ViewMode>('browse');
@@ -25,6 +33,15 @@ const ShortsPage = () => {
     setSelectedSkill('');
     setSelectedTopic('');
   };
+
+  // Add a loading state if you fetch data, e.g. shorts/videos
+  // const [loading, setLoading] = useState(false); // Uncomment if you fetch data
+  // if (loading) return (
+  //   <div className="min-h-screen bg-black">
+  //     <Header />
+  //     <ShortsSkeleton />
+  //   </div>
+  // );
 
   return (
     <div className="min-h-screen bg-black">

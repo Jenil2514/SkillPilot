@@ -234,4 +234,20 @@ const PostCard = ({ post }: PostCardProps) => {
   );
 };
 
+const PostCardSkeleton = () => (
+  <Card className="animate-pulse mb-4">
+    <CardContent className="flex space-x-3 p-4">
+      <div className="w-10 h-10 bg-gray-200 rounded-full" />
+      <div className="flex-1">
+        <div className="h-4 bg-gray-100 rounded w-1/2 mb-2" />
+        <div className="h-3 bg-gray-100 rounded w-3/4 mb-2" />
+        <div className="h-3 bg-gray-100 rounded w-1/3" />
+      </div>
+    </CardContent>
+  </Card>
+);
+
+// Optionally, you can use this skeleton in PostFeed or while loading comments/likes.
+
 export default PostCard;
+export { PostCardSkeleton };

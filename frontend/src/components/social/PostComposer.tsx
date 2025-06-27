@@ -5,6 +5,20 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
+const PostComposerSkeleton = () => (
+  <Card className="animate-pulse">
+    <CardContent className="p-4">
+      <div className="flex space-x-3">
+        <div className="w-10 h-10 bg-gray-200 rounded-full" />
+        <div className="flex-1">
+          <div className="h-10 bg-gray-100 rounded w-full mb-2" />
+          <div className="h-8 bg-gray-200 rounded w-1/3" />
+        </div>
+      </div>
+    </CardContent>
+  </Card>
+);
+
 const PostComposer = () => {
   const [postContent, setPostContent] = useState('');
   const [loading, setLoading] = useState(false);
@@ -34,6 +48,9 @@ const PostComposer = () => {
       }
     }
   };
+
+  // Optionally show skeleton if loading
+  // if (loading) return <PostComposerSkeleton />;
 
   return (
     <Card>

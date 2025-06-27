@@ -8,6 +8,19 @@ import api from '@/services/api';
 import linkdin from '@/components/images/linkedin.png'
 import github from '@/components/images/github.png'
 
+// Skeleton Loader for ContactUs
+const ContactSkeleton = () => (
+  <div className="flex justify-center items-center min-h-screen bg-background animate-pulse">
+    <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
+      <div className="h-8 bg-gray-200 rounded w-2/3 mb-6" />
+      <div className="h-4 bg-gray-100 rounded w-full mb-4" />
+      <div className="h-4 bg-gray-100 rounded w-full mb-4" />
+      <div className="h-4 bg-gray-100 rounded w-full mb-4" />
+      <div className="h-10 bg-gray-300 rounded w-full mt-6" />
+    </div>
+  </div>
+);
+
 const ContactUs = () => {
   const [formData, setFormData] = useState({
     name: '',
@@ -67,6 +80,8 @@ const ContactUs = () => {
       setLoading(false);
     }
   };
+
+  if (loading) return <ContactSkeleton />;
 
   return (
     <div className="min-h-screen bg-background">

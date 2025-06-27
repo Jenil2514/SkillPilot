@@ -53,4 +53,5 @@ export interface CourseViewerProps {
   university: University | null;
     selectedSemester: string | null;
     selectedCourse: string | null;
+    loading?: boolean;
 }

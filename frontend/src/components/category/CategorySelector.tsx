@@ -22,9 +22,25 @@ interface CategorySelectorProps {
   categories: CategoryData[];
   selectedCategory: CategoryData | null;
   onCategorySelect: (categoryName: string) => void;
+  loading?: boolean;
 }
 
-const CategorySelector = ({ categories, selectedCategory, onCategorySelect }: CategorySelectorProps) => {
+const CategorySelectorSkeleton = () => (
+  <Card>
+    <CardHeader>
+      <CardTitle>Categories</CardTitle>
+    </CardHeader>
+    <CardContent className="space-y-2 animate-pulse">
+      {[...Array(5)].map((_, i) => (
+        <div key={i} className="h-10 bg-gray-100 rounded w-full" />
+      ))}
+    </CardContent>
+  </Card>
+);
+
+const CategorySelector = ({ categories, selectedCategory, onCategorySelect, loading = false }: CategorySelectorProps) => {
+  if (loading) return <CategorySelectorSkeleton />;
+
   return (
     <Card>
       <CardHeader>

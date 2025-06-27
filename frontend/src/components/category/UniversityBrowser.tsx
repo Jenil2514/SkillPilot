@@ -18,9 +18,23 @@ interface UniversityBrowserProps {
   selectedUniversity: string;
   onUniversitySelect: (university: string) => void;
   onSemesterCourseSelect: (semester: string, course: string) => void;
+  loading?: boolean;
 }
 
-const UniversityBrowser = ({ universities, selectedUniversity, onUniversitySelect, onSemesterCourseSelect, }: UniversityBrowserProps) => {
+const UniversityBrowserSkeleton = () => (
+  <Card className="animate-pulse">
+    <CardHeader>
+      <CardTitle>Universities</CardTitle>
+    </CardHeader>
+    <CardContent>
+      {[...Array(3)].map((_, i) => (
+        <div key={i} className="h-8 bg-gray-100 rounded w-full mb-3" />
+      ))}
+    </CardContent>
+  </Card>
+);
+
+const UniversityBrowser = ({ universities, selectedUniversity, onUniversitySelect, onSemesterCourseSelect, loading = false }: UniversityBrowserProps) => {
   const [openSemesters, setOpenSemesters] = useState<string[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
 
@@ -41,7 +55,7 @@ const UniversityBrowser = ({ universities, selectedUniversity, onUniversitySelec
     setOpenSemesters([]);
   };
   const [selectedUniversityData, setSelectedUniversityData] = useState<University | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [loadingData, setLoading] = useState(false);
   const [selectedSemester, setSelectedSemester] = useState<string | null>(null);
   const [selectedCourse, setSelectedCourse] = useState<string | null>(null);
 

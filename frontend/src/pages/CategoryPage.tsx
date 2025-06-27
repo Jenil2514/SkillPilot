@@ -10,6 +10,18 @@ import CategorySelector from '@/components/category/CategorySelector';
 import UniversityBrowser from '@/components/category/UniversityBrowser';
 import { CourseData } from '@/components/types/type';
 
+// Skeleton Loader for CategoryPage
+const CategorySkeleton = () => (
+  <div className="animate-pulse">
+    <div className="h-8 bg-gray-200 rounded w-1/3 mb-4" />
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {[...Array(6)].map((_, i) => (
+        <div key={i} className="h-40 bg-gray-100 rounded mb-4" />
+      ))}
+    </div>
+  </div>
+);
+
 const CategoryPage = () => {
   const [categories, setCategories] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState(null); // category object
@@ -104,7 +116,6 @@ const CategoryPage = () => {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-background">
       <Header />
-
       <div className="container mx-auto px-4 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 dark:bg-background">
           {/* Category Selector */}
@@ -115,7 +126,6 @@ const CategoryPage = () => {
               onCategorySelect={handleCategorySelect}
             />
           </div>
-
           {/* University Browser */}
           {selectedCategory?.type === 'university' && (
             <div className="lg:col-span-9">
@@ -127,27 +137,15 @@ const CategoryPage = () => {
               />
             </div>
           )}
-
-          {/* Course Content
-          {selectedCategory?.type === 'university' && selectedCourse && (
-            <div className="lg:col-span-6">
-              <CourseViewer
-                university={selectedUniversity}
-                semester={selectedSemester}
-                course={selectedCourse}
-              />
-            </div>
-          )} */}
-
           {/* Other Categories */}
           {selectedCategory && selectedCategory.type !== 'university' && (
             <div className="lg:col-span-9">
               <h2 className="text-2xl font-bold mb-4">{selectedCategory.name}</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {savedCoursesLoading ? (
-                  <p>Loading courses...</p>
-                ) : (selectedCategory.courses?.length ?? 0) > 0 ? (
-                  selectedCategory.courses.map((course: CourseData) => (
+              {savedCoursesLoading ? (
+                <CategorySkeleton />
+              ) : (selectedCategory.courses?.length ?? 0) > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {selectedCategory.courses.map((course: CourseData) => (
                     <CourseCard
                       key={course._id}
                       courseId={course._id}
@@ -157,11 +155,11 @@ const CategoryPage = () => {
                       badge={course.badge}
                       initiallyBookmarked={savedCourses.includes(course._id)}
                     />
-                  ))
-                ) : (
-                  <p>No courses available.</p>
-                )}
-              </div>
+                  ))}
+                </div>
+              ) : (
+                <p>No courses available.</p>
+              )}
             </div>
           )}
         </div>

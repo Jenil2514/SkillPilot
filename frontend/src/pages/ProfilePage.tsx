@@ -11,6 +11,19 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {  Edit, Save, X } from 'lucide-react';
 import axios from 'axios';
 
+// Skeleton Loader for ProfilePage
+const ProfileSkeleton = () => (
+  <div className="flex justify-center items-center min-h-screen bg-background animate-pulse">
+    <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
+      <div className="h-24 w-24 bg-gray-200 rounded-full mx-auto mb-6" />
+      <div className="h-8 bg-gray-200 rounded w-2/3 mb-4 mx-auto" />
+      <div className="h-4 bg-gray-100 rounded w-1/2 mb-2 mx-auto" />
+      <div className="h-4 bg-gray-100 rounded w-1/3 mb-2 mx-auto" />
+      <div className="h-4 bg-gray-100 rounded w-1/4 mb-2 mx-auto" />
+    </div>
+  </div>
+);
+
 const ProfilePage = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(true);
