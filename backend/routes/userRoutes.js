@@ -4,7 +4,7 @@ import jwt from 'jsonwebtoken';
 import User from '../models/User.js';
 import auth from '../middleware/auth.js';
 import validator from 'validator';
-import crypto from 'crypto';
+import dotenv from 'dotenv';
 import nodemailer from 'nodemailer';
 
 const router = express.Router();
@@ -192,46 +192,38 @@ router.put('/profile', auth, async (req, res) => {
   }
 });
 
-// Forgot password - send OTP
+// Forgot password - send OTP (public, not authenticated)
 router.post('/forgot-password', async (req, res) => {
   const { email } = req.body;
-
   if (!email || !validator.isEmail(email)) {
     return res.status(400).json({ message: 'Valid email is required' });
   }
-
   try {
     const user = await User.findOne({ email });
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
-
     // Generate OTP
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
     const otpExpires = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
-
     user.resetPasswordOTP = otp;
     user.resetPasswordExpires = otpExpires;
     await user.save();
-
     // Send email with OTP
     const transporter = nodemailer.createTransport({
-      service: 'gmail', // or your email provider
+      service: 'gmail',
       auth: {
-        user: process.env.EMAIL_USER, // your email
-        pass: process.env.EMAIL_PASS  // your email password or app password
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS
       }
     });
-
     const mailOptions = {
       from: process.env.EMAIL_USER,
       to: email,
       subject: 'Your OTP for Password Reset',
       text: `Your OTP for password reset is: ${otp}. It will expire in 10 minutes.`
     };
-
     await transporter.sendMail(mailOptions);
-
     res.json({ message: 'OTP sent to your email' });
   } catch (err) {
     res.status(500).json({ error: err.message });

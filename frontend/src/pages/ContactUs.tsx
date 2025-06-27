@@ -1,15 +1,12 @@
-
 import React, { useState } from 'react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Mail, Phone, MapPin, Send } from 'lucide-react';
+import { Mail, MessageCircle,Share2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import api from '@/services/api';
+import linkdin from '@/components/images/linkedin.png'
+import github from '@/components/images/github.png'
 
 const ContactUs = () => {
   const [formData, setFormData] = useState({
@@ -167,12 +164,12 @@ const ContactUs = () => {
                 </CardHeader>
                 <CardContent className="space-y-6">
                   <div className="flex items-start space-x-4">
-                    <div className="bg-purple-100 p-3 rounded-lg">
-                      <Mail className="h-6 w-6 text-purple-600" />
+                    <div className="bg-purple-100 p-2 rounded-lg">
+                      <Mail className="h-4 w-4 text-purple-600" />
                     </div>
                     <div>
                       <h3 className="font-semibold text-gray-900 dark:text-gray-300">Email</h3>
-                      <p className="text-gray-600 dark:text-gray-300">support@edulearn.com</p>
+                      <p className="text-gray-600 dark:text-gray-300">skillpilot55@gmail.com</p>
                       <p className="text-sm text-gray-500 dark:text-gray-300">We'll respond within 24 hours</p>
                     </div>
                   </div>
@@ -180,15 +177,18 @@ const ContactUs = () => {
                   
                   
                   <div className="flex items-start space-x-4">
-                    <div className="bg-purple-100 p-3 rounded-lg">
-                      <MapPin className="h-6 w-6 text-purple-600" />
+                    <div className="bg-purple-100 p-2 rounded-lg">
+                      <Share2 className="h-4 w-4 text-purple-600" />
                     </div>
                     <div>
-                      <h3 className="font-semibold text-gray-900 dark:text-gray-300">Office</h3>
+                      <h3 className="font-semibold text-gray-900 dark:text-gray-300">Other Hendles</h3>
                       <p className="text-gray-600 dark:text-gray-300">
-                        123 Learning Street<br />
-                        Education City, EC 12345<br />
-                        United States
+                        <a href="http://www.linkedin.com/in/jenilgoswami" target="_blank" rel="noopener noreferrer" className="text-purple-600 hover:underline">
+                          <img src={linkdin} alt="LinkedIn" className="inline h-5 w-5 mr-3" />
+                        </a>
+                        <a href="https://github.com/Jenil2514" target="_blank" rel="noopener noreferrer" className="text-purple-600 hover:underline">
+                          <img src={github} alt="GitHub" className="inline h-5 w-5 mr-2" />
+                        </a>
                       </p>
                     </div>
                   </div>
@@ -211,7 +211,7 @@ const ContactUs = () => {
                     </div> */}
                     <div>
                       <h4 className="font-medium text-gray-900 dark:text-gray-300">How do I contact support?</h4>
-                      <p className="text-sm text-gray-600 dark:text-gray-300">Use this contact form or email us directly.</p>
+                      <p className="text-sm text-gray-600 dark:text-gray-300"> email us directly.</p>
                     </div>
                   </div>
                 </CardContent>

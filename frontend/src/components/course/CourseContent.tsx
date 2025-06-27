@@ -478,12 +478,12 @@ const CourseContent = ({ course }: CourseContentPorps) => {
                                               ? 'Article'
                                               : resource.type.charAt(0).toUpperCase() + resource.type.slice(1)
                                           }
+                                        </span>
                                           <p className="text-xs text-gray-500 mt-2 hover:underline cursor-pointer" >
                                             <Link to={`/user/${resource.AddedBy}`}>
                                               Added by {userNames[resource.AddedBy] || 'Anonymous'}
                                             </Link>
                                           </p>
-                                        </span>
                                       </div>
                                       <div className="flex items-center gap-2">
                                         <a
