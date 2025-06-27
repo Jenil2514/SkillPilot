@@ -2,7 +2,7 @@ import axios from 'axios';
 
 // Create axios instance with base configuration
 const api = axios.create({
-  baseURL: (import.meta.env.VITE_BACKEND_URI || 'http://localhost:5000') + '/api',
+  baseURL: (import.meta.env.VITE_BACKEND_URI || 'http://localhost:5000') + '/api', // Remove trailing slash
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json',

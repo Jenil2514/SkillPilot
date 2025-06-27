@@ -15,13 +15,14 @@ const LearnersViewing = () => {
   const token = localStorage.getItem("token");
 
   useEffect(() => {
+    const apiUrl = import.meta.env.VITE_BACKEND_URI || 'http://localhost:5000';
     const fetchCourses = async () => {
       try {
         if (!token) {
           console.error("No authentication token found");
           return;
         }
-        const res = await axios.get("http://localhost:5000/api/courses");
+        const res = await axios.get(`${apiUrl}/api/courses`);
         const sortedCourses = res.data.sort((a, b) => (b.views || 0) - (a.views || 0));
         setCourses(sortedCourses);
       } catch (error) {
@@ -37,7 +38,7 @@ const LearnersViewing = () => {
         return;
       }
       try {
-        const res = await axios.get("http://localhost:5000/api/users/saved", {
+        const res = await axios.get(`${apiUrl}/api/users/saved`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         setSavedCourses(res.data.map((course: CourseData) => course._id));
@@ -53,9 +54,10 @@ const LearnersViewing = () => {
   // Save/Unsave handlers
   const handleSave = async (courseId: string) => {
     if (!token) return;
+    const apiUrl = import.meta.env.VITE_BACKEND_URI || 'http://localhost:5000';
     try {
       await axios.post(
-        `http://localhost:5000/api/users/save/${courseId}`,
+        `${apiUrl}/api/users/save/${courseId}`,
         {},
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -67,9 +69,10 @@ const LearnersViewing = () => {
 
   const handleUnsave = async (courseId: string) => {
     if (!token) return;
+    const apiUrl = import.meta.env.VITE_BACKEND_URI || 'http://localhost:5000';
     try {
       await axios.delete(
-        `http://localhost:5000/api/users/unsave/${courseId}`,
+        `${apiUrl}/api/users/unsave/${courseId}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       setSavedCourses((prev) => prev.filter((id) => id !== courseId));
