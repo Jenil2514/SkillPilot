@@ -63,7 +63,7 @@ const CoursePage = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const apiUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000';
+    const apiUrl = import.meta.env.VITE_BACKEND_URI || 'http://localhost:5000';
     const fetchCourse = async () => {
       try {
         // Increment view count (fire and forget)
@@ -71,7 +71,6 @@ const CoursePage = () => {
         // Fetch course data
         const res = await axios.get(`${apiUrl}/api/courses/${courseId}`);
         setCourse(res.data);
-        // console.log('Course data fetched:', res.data);
       } catch (err) {
         setCourse(null);
       } finally {
