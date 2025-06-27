@@ -51,7 +51,7 @@ const UserProfile = () => {
       }
 
       try {
-        const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+        const apiUrl = import.meta.env.VITE_BACKEND_URI || 'http://localhost:5000';
         const response = await api.get(`${apiUrl}/api/users/profile/${userId}`);
         setUserProfile(response.data);
       } catch (error: any) {

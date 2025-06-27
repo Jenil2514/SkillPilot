@@ -49,7 +49,7 @@ const ProfilePage = () => {
       setLoading(true);
       try {
         const token = localStorage.getItem('token'); // Or wherever you store your JWT
-        const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000'; // Use environment variable or default to '/api'
+        const apiUrl = import.meta.env.VITE_BACKEND_URI || 'http://localhost:5000'; // Use environment variable or default to '/api'
         
         const response = await axios.get(`${apiUrl}/api/users/profile`, {
           headers: { Authorization: `Bearer ${token}` }
@@ -94,7 +94,7 @@ const ProfilePage = () => {
       const token = localStorage.getItem('token');
       // Only send editable fields
       const { name, email, bio, location, profession } = profileData; // <-- Added email
-      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+      const apiUrl = import.meta.env.VITE_BACKEND_URI || 'http://localhost:5000';
       await axios.put(
         `${apiUrl}/api/users/profile`,
         { name, email, bio, location, profession }, // <-- Added email
