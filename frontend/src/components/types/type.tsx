@@ -34,7 +34,7 @@ export interface CourseData {
   checkpoints: checkpoints[];
   instructor: string,
   badge: string,
-
+  tags?: string[]; // Added tags property
 }
 
 export interface SemesterData {

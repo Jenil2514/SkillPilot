@@ -58,7 +58,7 @@ const SearchPage = () => {
           headers: { Authorization: `Bearer ${token}` }
         });
         // res.data is an array of course objects, extract their _id
-        setSavedCourses(res.data.map((course: any) => course._id));
+        setSavedCourses(res.data.map((course: CourseData) => course._id));
       } catch (err) {
         // Optionally handle error
       }

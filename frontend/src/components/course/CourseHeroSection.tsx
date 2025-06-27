@@ -7,7 +7,7 @@ import { CourseData } from '../types/type';
 
 
 
-type CourseHeroSectionProps = { course: CourseData, loading?: boolean };
+type CourseHeroSectionProps = { course: CourseData, loading?: boolean ,tags?: string[]};
 
 // Skeleton Loader for CourseHeroSection
 const CourseHeroSectionSkeleton = () => (
@@ -32,7 +32,7 @@ const CourseHeroSectionSkeleton = () => (
   </section>
 );
 
-const CourseHeroSection = ({ course, loading = false }: CourseHeroSectionProps) => {
+const CourseHeroSection = ({ course, loading = false, tags }: CourseHeroSectionProps) => {
   const handleStartCourseClick = () => {
     window.scrollTo({
       top: window.innerHeight / 1.5,
@@ -70,6 +70,20 @@ const CourseHeroSection = ({ course, loading = false }: CourseHeroSectionProps) 
                 </div>
 
               </div>
+
+              {/* Tags Section */}
+              {tags && tags.length > 0 && (
+                <div className="flex flex-wrap gap-2 mb-6">
+                  {tags.map((tag: string, idx: number) => (
+                    <span
+                      key={idx}
+                      className="bg-purple-100 text-purple-700 px-2 py-1 rounded text-xs font-semibold"
+                    >
+                      #{tag}
+                    </span>
+                  ))}
+                </div>
+              )}
 
               <Button
                 className="w-full bg-purple-600 hover:bg-purple-700 mb-4"

@@ -91,10 +91,13 @@ const CoursePage = () => {
   );
   if (!course) return <div>Course not found.</div>;
 
+  // Ensure tags is always an array
+  const tags = Array.isArray(course.tags) ? course.tags : [];
+
   return (
     <div className="min-h-screen bg-white">
       <Header />
-      <CourseHeroSection course={course} />
+      <CourseHeroSection course={course} tags={tags} />
       <CourseContent course={course}/>
       {/* <CourseTestimonials /> */}
       {/* <CourseFAQ /> */}
