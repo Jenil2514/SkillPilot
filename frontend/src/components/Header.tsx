@@ -18,7 +18,7 @@ const Header = () => {
           {/* Logo */}
           <div className="flex items-center space-x-8">
             <Link to="/">
-              <h1 className="text-2xl font-bold text-purple-600">EduLearn</h1>
+              <h1 className="text-2xl font-bold text-purple-600">SkillPilot</h1>
             </Link>
 
             {/* Categories */}

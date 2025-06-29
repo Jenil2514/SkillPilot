@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Heart, MessageCircle, Share } from 'lucide-react';
 import { PostCardProps } from '../types/feedType';
+import { toast } from '@/hooks/use-toast';
 
 const PostCard = ({ post }: PostCardProps) => {
   const [likeCount, setLikeCount] = useState(Array.isArray(post.likes) ? post.likes.length : Number(post.likes) || 0);
@@ -25,6 +26,7 @@ const PostCard = ({ post }: PostCardProps) => {
   const [loadingComments, setLoadingComments] = useState(false);
   const token = localStorage.getItem('token');
   const apiUrl = import.meta.env.VITE_BACKEND_URI || 'http://localhost:5000';
+  const navigate = useNavigate();
 
   // Helper to get liked posts from localStorage
   const getLikedPosts = () => {
@@ -59,7 +61,11 @@ const PostCard = ({ post }: PostCardProps) => {
 
   const handleLike = async () => {
     if (!token) {
-      console.error('No token found. User might not be authenticated.');
+      toast({
+        title: 'Login required',
+        description: 'Please login to like posts.',
+      });
+      setTimeout(() => navigate('/auth'), 1000);
       return;
     }
 
@@ -96,7 +102,15 @@ const PostCard = ({ post }: PostCardProps) => {
   };
 
   const handleAddComment = async () => {
-    if (!token || !newComment.trim()) return;
+    if (!token) {
+      toast({
+        title: 'Login required',
+        description: 'Please login to comment.',
+      });
+      setTimeout(() => navigate('/auth'), 1000);
+      return;
+    }
+    if (!newComment.trim()) return;
     const apiUrl = import.meta.env.VITE_BACKEND_URI || 'http://localhost:5000';
     try {
       const response = await axios.post(

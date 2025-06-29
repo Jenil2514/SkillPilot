@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { ThumbsUp, MessageCircle, Plus, ExternalLink, Youtube } from 'lucide-react';
 import axios from 'axios';
-import { Resource, Comment, CourseData, SemesterData, } from '@/components/types/type';
+import { Resource, CourseData, SemesterData, } from '@/components/types/type';
 import { CourseViewerProps } from '@/components/types/type';
 import { University } from '@/components/types/type';
 import { toast } from '@/hooks/use-toast';
@@ -52,14 +52,7 @@ const CourseViewer = ({ university, selectedSemester, selectedCourse, loading = 
   // console.log('Selected Course:', selectedCourse);
 
   // Flatten all resources from all courses and keep course info with each resource
-  const allResources = courseData.flatMap(course =>
-    course.resources.map(resource => ({
-      courseId: course._id,
-      courseName: course.name,
-      courseDescription: course.description,
-      ...resource
-    }))
-  );
+
 
   // Now you can use allResources as a flat array of resources with course info
   // console.log(allResources);
@@ -80,10 +73,23 @@ const CourseViewer = ({ university, selectedSemester, selectedCourse, loading = 
     tags: ''
   });
 
+  // Check if user is logged in
+  const isLoggedIn = Boolean(localStorage.getItem('token'));
 
 
   // LEft off here: Implement upvote functionality------------------------------------
   const handleUpvote = async (sourceId: string) => {
+    // Check for token before making request
+    const token = localStorage.getItem('token');
+    if (!token) {
+      toast({
+        title: 'You need to login',
+        description: 'Please login to upvote resources.',
+        variant: 'destructive',
+      });
+      window.location.href = '/auth'; // Redirect to login page
+      return;
+    }
     // Find the courseId for this resource
     const course = courseData.find(c => c.resources.some(r => r._id === sourceId));
     const courseId = course?._id;
@@ -102,7 +108,7 @@ const CourseViewer = ({ university, selectedSemester, selectedCourse, loading = 
         {},
         {
           headers: {
-            Authorization: `Bearer ${localStorage.getItem('token')}`
+            Authorization: `Bearer ${token}`
           }
         }
       );
@@ -131,6 +137,18 @@ const CourseViewer = ({ university, selectedSemester, selectedCourse, loading = 
           description: "You have already upvoted this resource.",
         });
         setUpvotedSources(prev => [...prev, sourceId]);
+      } else if (
+        typeof error === "object" &&
+        error !== null &&
+        "response" in error &&
+        (error as { response?: { status?: number } }).response?.status === 401
+      ) {
+        toast({
+          title: 'You need to login',
+          description: 'Please login to upvote resources.',
+          variant: 'destructive',
+        });
+        window.location.href = '/auth';
       } else {
         console.error('Failed to upvote:', error);
       }
@@ -248,8 +266,19 @@ const CourseViewer = ({ university, selectedSemester, selectedCourse, loading = 
             </p>
           </div>
           <Button
-            onClick={() => setShowAddSource(!showAddSource)}
-            className="bg-purple-600 hover:bg-purple-700 text-white"
+            onClick={() => {
+              if (!isLoggedIn) {
+                window.location.href = '/auth';
+              } else {
+                setShowAddSource(!showAddSource);
+              }
+            }}
+            className={
+              isLoggedIn
+                ? 'bg-purple-600 hover:bg-purple-700 text-white'
+                : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+            }
+            disabled={!isLoggedIn}
           >
             <Plus className="h-4 w-4 mr-2" />
             Add Source
