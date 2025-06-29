@@ -268,7 +268,14 @@ const CourseViewer = ({ university, selectedSemester, selectedCourse, loading = 
           <Button
             onClick={() => {
               if (!isLoggedIn) {
-                window.location.href = '/auth';
+                toast({
+                  title: 'Login Required',
+                  description: 'You must be logged in to add a resource.',
+                  variant: 'destructive',
+                });
+                setTimeout(() => {
+                  window.location.href = '/auth';
+                }, 1000);
               } else {
                 setShowAddSource(!showAddSource);
               }
