@@ -409,7 +409,7 @@ const CourseContent = ({ course, loading = false }: CourseContentPorps) => {
                         </span>
                         {/* Add Resource Button */}
                         <button
-                          className={`px-2 py-1 rounded text-sm ${isLoggedIn ? 'bg-purple-600 text-white' : 'bg-gray-300 text-gray-500 cursor-not-allowed'}`}
+                          className="px-2 py-1 bg-purple-600 text-white rounded text-sm"
                           onClick={() => {
                             if (!isLoggedIn) {
                               window.location.href = '/auth';
@@ -418,7 +418,6 @@ const CourseContent = ({ course, loading = false }: CourseContentPorps) => {
                             }
                           }}
                           type="button"
-                          disabled={!isLoggedIn}
                         >
                           + Add Resource
                         </button>
@@ -607,10 +606,9 @@ const CourseContent = ({ course, loading = false }: CourseContentPorps) => {
                         placeholder="Add a comment..."
                         value={sidebarComment}
                         onChange={e => setSidebarComment(e.target.value)}
-                        disabled={!isLoggedIn}
                       />
                       <button
-                        className={`px-4 py-1 rounded ${isLoggedIn ? 'bg-blue-600 text-white' : 'bg-gray-300 text-gray-500 cursor-not-allowed'}`}
+                        className="bg-blue-600 text-white px-4 py-1 rounded"
                         onClick={() => {
                           if (!isLoggedIn) {
                             window.location.href = '/auth';
@@ -618,7 +616,7 @@ const CourseContent = ({ course, loading = false }: CourseContentPorps) => {
                             handleSidebarAddComment();
                           }
                         }}
-                        disabled={!sidebarComment.trim() || !isLoggedIn}
+                        disabled={!sidebarComment.trim()}
                       >
                         Post Comment
                       </button>

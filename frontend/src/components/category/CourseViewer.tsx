@@ -273,12 +273,7 @@ const CourseViewer = ({ university, selectedSemester, selectedCourse, loading = 
                 setShowAddSource(!showAddSource);
               }
             }}
-            className={
-              isLoggedIn
-                ? 'bg-purple-600 hover:bg-purple-700 text-white'
-                : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-            }
-            disabled={!isLoggedIn}
+            className="bg-purple-600 hover:bg-purple-700 text-white"
           >
             <Plus className="h-4 w-4 mr-2" />
             Add Source
