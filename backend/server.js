@@ -35,10 +35,15 @@ const app = express();
 
 // Security Middleware
 app.use(helmet());
+
 app.use(cors({
-origin: 'https://skill-pilot-lake.vercel.app',
-credentials: true, // if you use cookies or authentication
+  origin: [
+    'https://skill-pilot-lake.vercel.app',            // your frontend
+    'https://ping-theta-three.vercel.app' // your vercel ping endpoint
+  ],
+  credentials: true,
 }));
+
 app.use(sanitizeRequest);
 // Increase body size limit to 5MB (or more if needed)
 app.use(express.json({ limit: '5mb' }));
@@ -55,6 +60,11 @@ max: 500,
 mongoose.connect(process.env.MONGO_URI)
 .then(() => console.log('MongoDB Connected'))
 .catch(err => console.log(err));
+
+//cron job
+app.get('/ping', cors({ origin: '*' }), (req, res) => {
+  res.send('Server is awake');
+});
 
 // Routes
 app.use('/api/courses', courseRoutes);
